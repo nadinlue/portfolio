@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="fonts/fonts.css">
+<script src="gallery/data.js"></script>
+<style>
+html,body{margin:0;background:#FAF8F4;color:#37263A;-webkit-font-smoothing:antialiased}
+a{color:#37263A;text-decoration:none}
+a:hover{color:#E09723}
+@media (max-width:560px){header nav{gap:12px!important;font-size:13px!important}header .hdr-name{font-size:15px!important}header .hdr-social{display:none!important}}
+@media (max-width:400px){header > div{padding-left:16px!important;padding-right:16px!important;gap:10px!important}header nav{gap:9px!important;font-size:12.5px!important}header .hdr-name{font-size:14px!important}}
+@keyframes lbIn{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+.catnav a:hover .arr,.catnav a:focus-visible .arr,.catnav a:active .arr{color:#E09723!important}
+.catnav a:hover .arr.prev,.catnav a:focus-visible .arr.prev{transform:translateX(-4px)}
+.catnav a:hover .arr.next,.catnav a:focus-visible .arr.next{transform:translateX(4px)}
+@media (max-width:640px){
+.catnav{display:grid!important;grid-template-columns:1fr 1fr;gap:16px!important;align-items:start!important}
+.catnav a{align-items:flex-start!important;margin-left:0!important}
+.catnav a:last-child{justify-content:flex-end;text-align:right}
+.catnav .arr{display:none}
+.catnav .ttl{font-size:22px!important;line-height:1.1!important;text-wrap:balance}
+.catnav a:first-child .lab::before{content:"\2190\00a0\00a0"}
+.catnav a:last-child .lab::after{content:"\00a0\00a0\2192"}
+.catnav .lab{white-space:nowrap}
+}
+header nav > a{transition:color .2s}header nav > a:hover,header nav > a:focus-visible{color:#E09723!important}
+a.back{transition:color .2s}a.back:hover,a.back:focus-visible{color:#E09723!important}
+</style>
+</helmet>
+
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:16px;line-height:1.5;background:#FAF8F4;color:#37263A;min-height:100vh">
+
+  <header style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(250,248,244,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #EAE5DC">
+    <div style="max-width:1440px;margin:0 auto;padding:16px clamp(20px,4vw,48px);display:flex;justify-content:space-between;align-items:center;gap:20px">
+      <a href="Home.dc.html" class="hdr-name" style="white-space:nowrap;font-weight:700;font-size:17px">Nadin Viranyi</a>
+      <nav style="display:flex;align-items:center;gap:clamp(14px,2.5vw,28px);font-size:14px;font-weight:500">
+        <a href="Home.dc.html#work">Work</a>
+        <a href="Home.dc.html#about">About</a>
+        <a href="Home.dc.html#contact">Contact</a>
+        <a href="other-work.html" style="white-space:nowrap">Other Work</a>
+        <span class="hdr-social" style="display:flex;align-items:center;gap:4px;margin-left:clamp(0px,1vw,8px)">
+          <a href="https://www.linkedin.com/in/nadinviranyi/" target="_blank" aria-label="LinkedIn" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;color:#37263A" style-hover="background:rgba(128,128,128,.18)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"></path></svg>
+          </a>
+          <a href="https://www.instagram.com/nadinviranyi/" target="_blank" aria-label="Instagram" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;color:#37263A" style-hover="background:rgba(128,128,128,.18)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"></circle></svg>
+          </a>
+        </span>
+      </nav>
+    </div>
+  </header>
+
+  <section data-screen-label="Gallery title" style="max-width:1440px;margin:0 auto;padding:clamp(112px,14vw,168px) clamp(20px,4vw,48px) clamp(28px,3vw,44px);display:flex;flex-direction:column;gap:clamp(20px,2.4vw,32px)">
+    <a class="back" href="Home.dc.html#work" style="font-size:14px;font-weight:500;color:#6E6370;align-self:flex-start">← All work</a>
+    <h1 style="margin:0;font-family:'Familjen Grotesk',sans-serif;font-weight:600;font-size:clamp(44px,7.4vw,120px);line-height:.95;letter-spacing:-.03em;text-wrap:balance">{{ title }}</h1>
+    <nav style="display:flex;flex-wrap:wrap;gap:8px">
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="4">
+        <a href="{{ c.href }}" style="padding:9px 16px;border-radius:999px;font-size:14px;font-weight:500;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.ink }};transition:border-color .2s,color .2s" style-hover="border-color:#E09723">{{ c.title }}</a>
+      </sc-for>
+    </nav>
+  </section>
+
+  <main style="max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,48px) clamp(64px,8vw,120px);display:flex;flex-direction:column;gap:clamp(48px,6vw,88px)">
+    <sc-for list="{{ projects }}" as="p" hint-placeholder-count="2">
+      <section id="{{ p.anchor }}" data-screen-label="{{ p.name }}" style="display:flex;flex-direction:column;gap:20px;scroll-margin-top:90px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-top:1px solid #EAE5DC;padding-top:16px">
+          <h2 style="margin:0;font-family:'Familjen Grotesk',sans-serif;font-weight:600;font-size:clamp(22px,2.2vw,30px);letter-spacing:-.02em;line-height:1.15">{{ p.name }}</h2>
+        </div>
+        <sc-if value="{{ p.hasVideo }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative;width:100%;aspect-ratio:16 / 9;border-radius:4px;overflow:hidden;background:#1C1420">{{ p.video }}</div>
+        </sc-if>
+        <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ p.mRows }}" as="row" hint-placeholder-count="3">
+              <div style="display:flex;gap:10px">
+                <sc-for list="{{ row.items }}" as="it" hint-placeholder-count="1">
+                  <button onClick="{{ it.open }}" aria-label="{{ it.label }}" style="flex:{{ it.grow }} 1 0;min-width:0;display:block;padding:0;margin:0;border:none;border-radius:4px;overflow:hidden;background:#EFEAE2;aspect-ratio:{{ it.ar }};cursor:zoom-in">
+                    <img src="{{ it.src }}" alt="{{ it.label }}" loading="lazy" decoding="async" style="display:block;width:100%;height:100%;object-fit:contain">
+                  </button>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:{{ gap }}px">
+          <sc-for list="{{ p.dRows }}" as="row" hint-placeholder-count="2">
+            <div style="display:flex;gap:{{ gap }}px">
+              <sc-for list="{{ row.items }}" as="it" hint-placeholder-count="3">
+                <button onClick="{{ it.open }}" aria-label="{{ it.label }}" style="display:block;flex:0 1 {{ it.dw }}px;min-width:0;height:{{ row.h }}px;padding:0;margin:0;border:none;border-radius:4px;overflow:hidden;background:#EFEAE2;cursor:zoom-in">
+                  <img data-gpar="" src="{{ it.src }}" alt="{{ it.label }}" loading="lazy" decoding="async" style="display:block;width:100%;height:100%;object-fit:cover;scale:1.05;translate:0 var(--gp,0px);transition:transform .6s cubic-bezier(.2,.8,.2,1),opacity .3s" style-hover="transform:scale(1.025)">
+                </button>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ p.hasClip }}" hint-placeholder-val="{{ false }}">
+          <figure style="margin:0;align-self:center;display:flex;flex-direction:column;gap:8px;width:min(100%,320px)">
+            <div style="position:relative;width:100%;aspect-ratio:{{ p.clipAr }};border-radius:4px;overflow:hidden;background:#1C1420">{{ p.clip }}</div>
+            <figcaption style="font-size:14px;color:#6E6370;text-align:center">{{ p.clipCap }}</figcaption>
+          </figure>
+        </sc-if>
+        <sc-if value="{{ p.hasAbout }}" hint-placeholder-val="{{ false }}">{{ p.about }}</sc-if>
+        <sc-if value="{{ p.showToggle }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ p.toggle }}" style="align-self:stretch;min-height:48px;padding:12px 20px;border:1px solid #37263A;border-radius:999px;background:transparent;color:#37263A;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer" style-active="background:#37263A;color:#FAF8F4">{{ p.toggleLabel }}</button>
+          </sc-if>
+      </section>
+    </sc-for>
+
+    <nav class="catnav" data-screen-label="Category carousel" aria-label="Other categories" style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px 32px;flex-wrap:wrap;border-top:1px solid #37263A;padding-top:20px">
+      <a href="{{ prevCat.href }}" style="display:flex;align-items:flex-end;gap:clamp(12px,1.6vw,20px)">
+        <span style="font-size:clamp(24px,2.8vw,40px);line-height:1;color:#37263A;transition:transform .25s,color .25s" class="arr prev">←</span>
+        <span style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#6E6370" class="lab">Previous</span>
+          <span style="font-family:'Familjen Grotesk',sans-serif;font-weight:600;font-size:clamp(26px,3.6vw,56px);letter-spacing:-.03em;line-height:1" class="ttl">{{ prevCat.title }}</span>
+        </span>
+      </a>
+      <a href="{{ next.href }}" style="display:flex;align-items:flex-end;gap:clamp(12px,1.6vw,20px);margin-left:auto;text-align:right">
+        <span style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span style="font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#6E6370" class="lab">Next</span>
+          <span style="font-family:'Familjen Grotesk',sans-serif;font-weight:600;font-size:clamp(26px,3.6vw,56px);letter-spacing:-.03em;line-height:1" class="ttl">{{ next.title }}</span>
+        </span>
+        <span style="font-size:clamp(24px,2.8vw,40px);line-height:1;color:#37263A;transition:transform .25s,color .25s" class="arr next">→</span>
+      </a>
+    </nav>
+  </main>
+
+  <div id="contact" data-screen-label="Get in touch banner" style="position:relative;margin-top:-2px;background:#33968A;padding:clamp(40px,5vw,72px) 20px calc(clamp(40px,5vw,64px) + clamp(40px,5vw,72px));clip-path:polygon(0 0,100% 0,100% calc(100% - clamp(40px,5vw,72px)),66% calc(100% - clamp(40px,5vw,72px)),50% 100%,34% calc(100% - clamp(40px,5vw,72px)),0 calc(100% - clamp(40px,5vw,72px)))">
+    <p data-drift="0.06" style="margin:0 auto;max-width:46ch;text-align:center;color:#FAF8F4;font-family:'Familjen Grotesk',sans-serif;font-weight:600;font-size:clamp(22px,2.6vw,38px);letter-spacing:-.03em;line-height:1.2;text-wrap:balance">Have a project in mind or a team I could contribute&nbsp;to?<br>I’d love to hear what you’re working&nbsp;on.</p>
+  </div>
+
+  <footer data-screen-label="Contact" style="max-width:1440px;margin:0 auto;padding:clamp(20px,2.5vw,36px) clamp(20px,4vw,48px) 28px;display:flex;flex-direction:column;align-items:center;gap:clamp(48px,6vw,88px)">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+      <h2 style="margin:0;font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#6E6370">Get in touch</h2>
+      <a href="mailto:contact.nadinviranyi@gmail.com" style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:0;width:min(460px,86vw);box-sizing:border-box;background:#E09723;color:#FAF8F4;padding:24px 32px;font-size:clamp(26px,2.4vw,34px);line-height:1;font-weight:700;box-shadow:6px 6px 0 #CB5A5A;transition:transform .2s,box-shadow .2s" style-hover="transform:translate(-2px,-2px);box-shadow:8px 8px 0 #CB5A5A;color:#FAF8F4"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3.5 6.5 12 13l8.5-6.5"></path></svg>Let’s talk</a>
+      <p style="margin:6px 0 0;font-size:16px;color:#6E6370">or reach out to <a href="mailto:contact.nadinviranyi@gmail.com" style="color:#E09723;font-weight:500;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere" style-hover="color:#C07F14">contact.nadinviranyi@gmail.com</a></p>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:clamp(18px,2vw,26px)">
+        <p style="margin:0;font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#6E6370">Or find me on</p>
+        <div style="display:flex;justify-content:center;gap:14px">
+          <a href="https://www.linkedin.com/in/nadinviranyi/" target="_blank" rel="noopener" aria-label="LinkedIn" title="LinkedIn" style="display:flex;align-items:center;justify-content:center;width:54px;height:54px;background:#22736C;color:#FAF8F4;transition:transform .2s" style-hover="transform:translateY(-2px);color:#FAF8F4"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"></path></svg></a>
+          <a href="https://www.artstation.com/nadinviranyi" target="_blank" rel="noopener" aria-label="ArtStation" title="ArtStation" style="display:flex;align-items:center;justify-content:center;width:54px;height:54px;background:#22736C;color:#FAF8F4;transition:transform .2s" style-hover="transform:translateY(-2px);color:#FAF8F4"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 17.723l2.027 3.505h.001a2.424 2.424 0 0 0 2.164 1.333h13.457l-2.792-4.838H0zm24 .025c0-.484-.143-.935-.388-1.314L15.728 2.728a2.424 2.424 0 0 0-2.142-1.289H9.419L21.598 22.54l1.92-3.325c.378-.637.482-.919.482-1.467zm-11.129-3.462L7.428 4.858l-5.444 9.428h10.887z"></path></svg></a>
+          <a href="https://www.instagram.com/nadinviranyi/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram" style="display:flex;align-items:center;justify-content:center;width:54px;height:54px;background:#22736C;color:#FAF8F4;transition:transform .2s" style-hover="transform:translateY(-2px);color:#FAF8F4"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"></circle></svg></a>
+        </div>
+      </div>
+    </div>
+    <div style="align-self:stretch;display:flex;justify-content:center;border-top:1px solid #EAE5DC;padding-top:20px;font-size:14px;color:#6E6370;flex-wrap:wrap;gap:6px 18px">
+      <span>© 2026 Nadin Viranyi</span><a href="legal-notice.html" style="color:#6E6370">Legal Notice</a><a href="privacy-policy.html" style="color:#6E6370">Privacy Policy</a>
+    </div>
+  </footer>
+
+  <sc-if value="{{ lbOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-label="Artwork viewer" onClick="{{ lbBgClick }}" onTouchStart="{{ lbTouchStart }}" onTouchEnd="{{ lbTouchEnd }}" style="position:fixed;inset:0;z-index:100;background:rgba(26,18,30,.97);color:#FAF8F4;display:flex;flex-direction:column">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px clamp(12px,2vw,24px) 12px clamp(20px,3vw,32px)">
+        <span style="font-size:14px;color:rgba(250,248,244,.7)">{{ lb.counter }}</span>
+        <button onClick="{{ close }}" aria-label="Close" style="width:48px;height:48px;border:none;border-radius:50%;background:transparent;color:#FAF8F4;font-size:26px;line-height:1;cursor:pointer" style-hover="background:rgba(255,255,255,.1)">×</button>
+      </div>
+      <div style="position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 clamp(8px,6vw,96px)">
+        {{ lbImg }}
+        <button onClick="{{ prev }}" aria-label="Previous" style="position:absolute;left:clamp(4px,1.5vw,24px);top:50%;transform:translateY(-50%);width:52px;height:52px;border:none;border-radius:50%;background:rgba(255,255,255,.08);color:#FAF8F4;font-size:22px;cursor:pointer" style-hover="background:#E09723">←</button>
+        <button onClick="{{ next2 }}" aria-label="Next" style="position:absolute;right:clamp(4px,1.5vw,24px);top:50%;transform:translateY(-50%);width:52px;height:52px;border:none;border-radius:50%;background:rgba(255,255,255,.08);color:#FAF8F4;font-size:22px;cursor:pointer" style-hover="background:#E09723">→</button>
+      </div>
+      <div style="padding:16px clamp(20px,3vw,32px) 22px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center">
+        <span style="font-size:15px;font-weight:500">{{ lb.project }}</span>
+        <span style="font-size:13px;color:rgba(250,248,244,.7)">{{ lb.cap }}</span>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;category&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;characters&quot;,&quot;illustration&quot;,&quot;backgrounds&quot;,&quot;marketing&quot;],&quot;default&quot;:&quot;characters&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const ORDER = ['characters', 'illustration', 'backgrounds', 'marketing'];
+// Desktop gallery: images sit in left-to-right rows of equal height; this is the target row height per category (px)
+const ROWH = { characters: 240, illustration: 360, backgrounds: 280, marketing: 280 };
+const VIDEO = { 'characters/endover-groove': 'TMrj8yudJjk', 'backgrounds/trolls-pop': '339KD73s96w' };
+// Looping clips shown under a project's images (category/project-id)
+const CLIP = { 'characters/bubble-busters': { src: 'gallery/web/characters/bubble-busters/cloudia-clip.mp4', poster: 'gallery/web/characters/bubble-busters/cloudia-clip-poster.webp', w: 600, h: 1080, cap: 'Cloudia in game' } };
+class Component extends DCLogic {
+  videoEl(key, name) {
+    const id = VIDEO[key], e = React.createElement, fill = { position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 };
+    if ((this.state.playing || {})[key]) return e('iframe', { src: 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1' + (/^https?:/.test(location.origin) ? '&origin=' + encodeURIComponent(location.origin) : ''), referrerPolicy: 'strict-origin-when-cross-origin', title: name + ' trailer', allow: 'autoplay; encrypted-media; picture-in-picture; fullscreen', allowFullScreen: true, style: fill });
+    return e('button', { onClick: () => { if (location.protocol === 'file:') { window.open('https://www.youtube.com/watch?v=' + id, '_blank', 'noopener'); return; } this.setState(s => ({ playing: { ...(s.playing || {}), [key]: true } })); }, 'aria-label': 'Play ' + name + ' trailer', style: { ...fill, padding: 0, cursor: 'pointer', background: '#1C1420' } },
+      e('img', { src: 'https://i.ytimg.com/vi/' + id + '/maxresdefault.jpg', onLoad: ev => { if (ev.target.naturalWidth <= 120) ev.target.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'; }, onError: ev => { ev.target.onerror = null; ev.target.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'; }, alt: '', style: { ...fill, objectFit: 'cover' } }),
+      e('span', { style: { position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 'clamp(64px,7vw,92px)', height: 'clamp(64px,7vw,92px)', borderRadius: '50%', background: '#E09723', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 30px rgba(0,0,0,.35)' } },
+        e('span', { style: { width: 0, height: 0, marginLeft: '12%', borderTop: '14px solid transparent', borderBottom: '14px solid transparent', borderLeft: '22px solid #FAF8F4' } })),
+      e('span', { style: { position: 'absolute', left: 16, bottom: 14, color: '#FAF8F4', fontFamily: "'Familjen Grotesk',sans-serif", fontWeight: 600, fontSize: 15, textShadow: '0 1px 8px rgba(0,0,0,.6)' } }, 'Watch the trailer'));
+  }
+  state = { lb: -1, ready: !!window.GALLERY, vw: document.documentElement.clientWidth || innerWidth, open: {} };
+  componentDidMount() {
+    this.onResize = () => this.setState({ vw: document.documentElement.clientWidth || innerWidth });
+    addEventListener('resize', this.onResize);
+    this.ro = new ResizeObserver(() => { const w = document.documentElement.clientWidth; if (w && w !== this.state.vw) this.setState({ vw: w }); });
+    this.ro.observe(document.documentElement);
+    if (!window.GALLERY) this.poll = setInterval(() => { if (window.GALLERY) { clearInterval(this.poll); this.setState({ ready: true }); } }, 50);
+    this.onKey = e => {
+      if (this.state.lb < 0) return;
+      if (e.key === 'Escape') this.close();
+      else if (e.key === 'ArrowRight') this.step(1);
+      else if (e.key === 'ArrowLeft') this.step(-1);
+    };
+    addEventListener('keydown', this.onKey);
+    // Scroll parallax: title drifts slower; desktop images shift gently inside their frames
+    this.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.par = () => {
+      this.parRaf = 0;
+      if (this.reduced) return;
+      const vh = innerHeight;
+      document.querySelectorAll('[data-drift]').forEach(el => {
+        const r = el.getBoundingClientRect(); if (r.bottom < -200 || r.top > vh + 200) return;
+        const cur = parseFloat((el.style.translate || '0 0').split(' ')[1]) || 0;
+        const d = (r.top - cur + r.height / 2) - vh / 2;
+        el.style.translate = '0 ' + Math.max(-80, Math.min(80, d * (parseFloat(el.getAttribute('data-drift')) || 0))).toFixed(1) + 'px';
+      });
+      document.querySelectorAll('[data-hdrift]').forEach(el => { const y = scrollY; if (y > vh * 1.5) return; el.style.translate = '0 ' + (-Math.min(140, y * (parseFloat(el.getAttribute('data-hdrift')) || 0))).toFixed(1) + 'px'; el.style.opacity = Math.max(0, 1 - y / 420).toFixed(3); });
+      document.querySelectorAll('[data-gpar]').forEach(el => {
+        const r = el.parentNode.getBoundingClientRect(); if (r.bottom < -50 || r.top > vh + 50) return;
+        const d = ((r.top + r.height / 2) - vh / 2) / (vh / 2 + r.height / 2);
+        el.style.setProperty('--gp', (Math.max(-1, Math.min(1, d)) * r.height * 0.022).toFixed(1) + 'px');
+      });
+    };
+    this.onScroll = () => { if (!this.parRaf) this.parRaf = requestAnimationFrame(this.par); };
+    addEventListener('scroll', this.onScroll, { passive: true });
+    setTimeout(this.par, 80);
+  }
+  componentDidUpdate() { if (this.par && !this.parRaf) this.parRaf = requestAnimationFrame(this.par); }
+  componentWillUnmount() { removeEventListener('scroll', this.onScroll); cancelAnimationFrame(this.parRaf); clearInterval(this.poll); removeEventListener('keydown', this.onKey); removeEventListener('resize', this.onResize); this.ro && this.ro.disconnect(); document.documentElement.style.overflow = ''; }
+  cat() {
+    const q = new URLSearchParams(location.search).get('c') || (location.hash.match(/^#(characters|illustration|backgrounds|marketing)$/) || [])[1];
+    const c = q || this.props.category || 'characters';
+    return ORDER.includes(c) ? c : 'characters';
+  }
+  flat() { const G = window.GALLERY; return G ? G[this.cat()].projects.flatMap(p => p.items.map(it => ({ ...it, project: p.name }))) : []; }
+  open(i) { document.documentElement.style.overflow = 'hidden'; this.setState({ lb: i }); }
+  close = () => { document.documentElement.style.overflow = ''; this.setState({ lb: -1 }); };
+  step(d) { const n = this.flat().length; this.setState(s => ({ lb: (s.lb + d + n) % n })); }
+  // Desktop: fill rows left to right; every image in a row gets the same height and nothing is cropped.
+  // A row closes once its height drops to the target; the last row keeps the target height and stays left-aligned.
+  justify(items, target) {
+    const vw = Math.min(this.state.vw, 1440), pad = Math.min(48, Math.max(20, vw * 0.04)), gap = this.gap();
+    const W = vw - 2 * pad - 1, rows = [];
+    let cur = [], sum = 0;
+    items.forEach((it, k) => {
+      cur.push(it); sum += it.w / it.h;
+      const h = (W - gap * (cur.length - 1)) / sum;
+      if (h <= target || k === items.length - 1) {
+        const rh = Math.floor(h <= target ? h : target);
+        rows.push({ h: rh, items: cur.map(x => ({ ...x, dw: Math.floor(x.w / x.h * rh) })) });
+        cur = []; sum = 0;
+      }
+    });
+    return rows;
+  }
+  gap() { return Math.round(Math.min(16, Math.max(10, Math.min(this.state.vw, 99999) * 0.012))); }
+  // Project description shown under a project's images. Text lives in gallery/data.js as "about" on a project:
+  // { project: { name, href, note }, quote, isQuote (true = show as a quote: italic in quote marks), role, client: { name, href, note }, type } (every part optional)
+  aboutEl(a) {
+    // Compact credits strip: description on the left, small labelled facts in columns beside it (stacks on phones)
+    const e = React.createElement, muted = '#6E6370', mobile = this.state.vw < 700;
+    const name = o => o.href ? e('a', { href: o.href, target: '_blank', rel: 'noopener', style: { color: '#37263A', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: '3px', textDecorationColor: '#E09723' } }, o.name) : e('span', { style: { fontWeight: 600 } }, o.name);
+    const cleanNote = n => n.replace(/^[·\-–(]\s*|\)$/g, '');
+    // desktop: label above value in its own column; phones: one compact line per fact (label left, value right)
+    const fact = (label, body, note) => mobile
+      ? e('div', { style: { display: 'grid', gridTemplateColumns: '96px minmax(0,1fr)', columnGap: 10, alignItems: 'baseline', fontSize: 13, lineHeight: 1.45 } },
+          e('span', { style: { fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: muted } }, label),
+          e('span', null, body, note ? e('span', { style: { color: muted } }, ' · ' + cleanNote(note)) : null))
+      : e('div', { style: { display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 } },
+          e('span', { style: { fontSize: 11, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: muted } }, label),
+          e('span', { style: { fontSize: 14, lineHeight: 1.45 } }, body),
+          note ? e('span', { style: { fontSize: 13, lineHeight: 1.4, color: muted } }, cleanNote(note)) : null);
+    const facts = [
+      a.project && fact('Project', name(a.project), a.project.note),
+      a.projects && fact('Projects', e('span', null, ...a.projects.flatMap((o, i) => i ? [', ', name(o)] : [name(o)])), a.projectsNote),
+      a.role && fact('Role', a.role),
+      a.client && fact('Client', name(a.client), a.client.note),
+      a.type && fact('Project Type', a.type),
+      a.extra && fact(a.extra.label, name(a.extra), a.extra.note)
+    ].filter(Boolean);
+    return e('div', { style: { display: 'grid', gridTemplateColumns: mobile ? '1fr' : (a.quote ? 'minmax(0,2fr) ' : '') + 'repeat(' + facts.length + ',minmax(0,1fr))', gap: mobile ? 6 : 'clamp(20px,3vw,40px)', alignItems: 'start', padding: mobile ? '12px 0 0' : '16px 0 0', borderTop: '1px solid #EAE5DC', color: '#37263A' } },
+      a.quote ? e('p', { style: { margin: mobile ? '0 0 6px' : 0, fontSize: mobile ? 13 : 14, lineHeight: 1.5, color: muted, maxWidth: '62ch', fontStyle: a.isQuote ? 'italic' : 'normal' } }, (q => a.isQuote ? '“' + q + '”' : q)(a.quote.replace(/^[“"]|[”"]$/g, ''))) : null,
+      ...facts);
+  }
+  renderVals() {
+    const G = window.GALLERY, c = this.cat();
+    const titles = { characters: 'Character Design', illustration: 'Illustration', backgrounds: 'Backgrounds / VisDev', marketing: 'Marketing & Branding' };
+    const href = k => 'Gallery.dc.html?c=' + k;
+    let gi = 0;
+    const isMobile = this.state.vw < 700;
+    const projects = G ? G[c].projects.map(p => {
+      const items = p.items.map(it => { const i = gi++; return { src: it.src, ar: it.w + ' / ' + it.h, w: it.w, h: it.h, feature: it.feature, label: p.name + (it.cap ? ' · ' + it.cap : ''), open: () => this.open(i) }; });
+      // mobile: first, landscape and flagged pieces span full width; portraits pair up; an unpaired portrait goes full width
+      const wide = items.map((it, k) => k === 0 || it.feature || it.w > it.h * 1.9);
+      for (let k = 0; k < items.length;) {
+        if (wide[k]) { k++; continue; }
+        let e = k; while (e < items.length && !wide[e]) e++;
+        if ((e - k) % 2) wide[e - 1] = true;
+        k = e;
+      }
+      // rows: wide pieces alone, others in pairs; pairs share a height (flex-grow = aspect ratio), so nothing is cropped
+      const rows = [];
+      for (let k = 0; k < items.length;) {
+        const n = wide[k] ? 1 : 2;
+        rows.push({ items: items.slice(k, k + n).map(it => ({ ...it, grow: n === 1 ? 1 : (it.w / it.h).toFixed(4) })) });
+        k += n;
+      }
+      let shown = 0, cutRows = rows.length;
+      for (let r = 0; r < rows.length; r++) { shown += rows[r].items.length; if (shown >= 5) { cutRows = r + 1; break; } }
+      const expanded = !!this.state.open[p.id];
+      const mRows = expanded ? rows : rows.slice(0, cutRows);
+      const cut = rows.slice(0, cutRows).reduce((a, r) => a + r.items.length, 0);
+      return {
+        name: p.name, anchor: 'p-' + p.id, items, mRows, hasAbout: !!p.about && (!isMobile || expanded || items.length <= cut), // phones: description only after "Show all"
+        about: p.about ? this.aboutEl(p.about) : null, dRows: this.justify(items, ROWH[c]),
+        hasVideo: !!VIDEO[c + '/' + p.id], video: VIDEO[c + '/' + p.id] ? this.videoEl(c + '/' + p.id, p.name) : null,
+        hasClip: !!CLIP[c + '/' + p.id], clipAr: CLIP[c + '/' + p.id] ? CLIP[c + '/' + p.id].w + ' / ' + CLIP[c + '/' + p.id].h : '', clipCap: CLIP[c + '/' + p.id] ? CLIP[c + '/' + p.id].cap : '',
+        clip: CLIP[c + '/' + p.id] ? React.createElement('video', { src: CLIP[c + '/' + p.id].src, poster: CLIP[c + '/' + p.id].poster, autoPlay: true, muted: true, loop: true, playsInline: true, preload: 'metadata', ref: el => { if (el && !el.muted) { el.muted = true; const pr = el.play(); if (pr) pr.catch(() => {}); } }, 'aria-label': p.name + ' · ' + CLIP[c + '/' + p.id].cap, style: { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' } }) : null,
+        hasMore: items.length > cut, showToggle: isMobile && items.length > cut, toggleLabel: expanded ? 'Show less' : 'Show all',
+        toggle: () => {
+          if (expanded) { const el = document.getElementById('p-' + p.id); if (el) scrollTo({ top: el.getBoundingClientRect().top + scrollY - 80 }); }
+          this.setState(s => ({ open: { ...s.open, [p.id]: !expanded } }));
+        }
+      };
+    }) : [];
+    const ni = ORDER[(ORDER.indexOf(c) + 1) % ORDER.length];
+    const pi = ORDER[(ORDER.indexOf(c) + ORDER.length - 1) % ORDER.length];
+    const flat = this.flat(), cur = flat[this.state.lb];
+    return {
+      title: titles[c], projects, gap: this.gap(), isMobile, isDesktop: !isMobile,
+      cats: ORDER.map(k => ({ title: titles[k], href: href(k), bg: k === c ? '#37263A' : 'transparent', ink: k === c ? '#FAF8F4' : '#37263A', border: k === c ? '#37263A' : '#DDD5C9' })),
+      next: { title: titles[ni], href: href(ni) },
+      prevCat: { title: titles[pi], href: href(pi) },
+      lbOpen: !!cur,
+      lb: cur ? { src: cur.src, label: cur.project, project: cur.project, cap: cur.cap, counter: (this.state.lb + 1) + ' / ' + flat.length } : {},
+      lbImg: cur ? React.createElement('img', { key: cur.src, src: cur.src, alt: cur.project, style: { maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', display: 'block', animation: 'lbIn .35s ease', userSelect: 'none' } }) : null,
+      close: this.close,
+      prev: e => { e.stopPropagation(); this.step(-1); },
+      next2: e => { e.stopPropagation(); this.step(1); },
+      lbBgClick: e => { if (e.target.tagName !== 'IMG' && e.target.tagName !== 'BUTTON') this.close(); },
+      lbTouchStart: e => { this.tx = e.touches[0].clientX; this.ty = e.touches[0].clientY; },
+      lbTouchEnd: e => { const dx = e.changedTouches[0].clientX - this.tx, dy = e.changedTouches[0].clientY - this.ty; if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) this.step(dx < 0 ? 1 : -1); }
+    };
+  }
+}
+</script>
+</body>
+</html>
