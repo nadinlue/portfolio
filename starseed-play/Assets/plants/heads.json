@@ -1,0 +1,205 @@
+{
+ "blue": [
+  {
+   "n": "blue/head1",
+   "anchor": [
+    0.358,
+    0.972
+   ],
+   "tilt": 0.0,
+   "w": 1.0
+  },
+  {
+   "n": "blue/head2",
+   "anchor": [
+    0.785,
+    0.941
+   ],
+   "tilt": -0.24,
+   "w": 0.872
+  },
+  {
+   "n": "blue/head3",
+   "anchor": [
+    0.178,
+    0.939
+   ],
+   "tilt": 0.31,
+   "w": 0.838
+  }
+ ],
+ "red": [
+  {
+   "n": "red/head1",
+   "anchor": [
+    0.62,
+    0.955
+   ],
+   "tilt": -0.17,
+   "w": 1.0
+  },
+  {
+   "n": "red/head2",
+   "anchor": [
+    0.737,
+    0.945
+   ],
+   "tilt": -0.36,
+   "w": 0.857
+  },
+  {
+   "n": "red/head3",
+   "anchor": [
+    0.343,
+    0.966
+   ],
+   "tilt": 0.35,
+   "w": 0.904
+  }
+ ],
+ "yellow": [
+  {
+   "n": "yellow/head1",
+   "anchor": [
+    0.466,
+    0.933
+   ],
+   "tilt": 0.11,
+   "w": 1.0
+  },
+  {
+   "n": "yellow/head2",
+   "anchor": [
+    0.669,
+    0.946
+   ],
+   "tilt": -0.3,
+   "w": 0.873
+  },
+  {
+   "n": "yellow/head3",
+   "anchor": [
+    0.399,
+    0.931
+   ],
+   "tilt": 0.35,
+   "w": 0.802
+  }
+ ],
+ "bluered": [
+  {
+   "n": "bluered/head1",
+   "anchor": [
+    0.408,
+    0.956
+   ],
+   "tilt": 0.11,
+   "w": 1.0
+  },
+  {
+   "n": "bluered/head2",
+   "anchor": [
+    0.636,
+    0.828
+   ],
+   "tilt": -0.48,
+   "w": 0.97
+  },
+  {
+   "n": "bluered/head3",
+   "anchor": [
+    0.351,
+    0.844
+   ],
+   "tilt": 0.29,
+   "w": 0.817
+  }
+ ],
+ "redyellow": [
+  {
+   "n": "redyellow/head1",
+   "anchor": [
+    0.479,
+    0.926
+   ],
+   "tilt": 0.0,
+   "w": 1.0
+  },
+  {
+   "n": "redyellow/head2",
+   "anchor": [
+    0.498,
+    0.899
+   ],
+   "tilt": 0.0,
+   "w": 0.797
+  },
+  {
+   "n": "redyellow/head3",
+   "anchor": [
+    0.516,
+    0.926
+   ],
+   "tilt": 0.0,
+   "w": 0.925
+  }
+ ],
+ "blueyellow": [
+  {
+   "n": "blueyellow/head1",
+   "anchor": [
+    0.419,
+    0.986
+   ],
+   "tilt": 0.06,
+   "w": 0.955
+  },
+  {
+   "n": "blueyellow/head2",
+   "anchor": [
+    0.846,
+    0.967
+   ],
+   "tilt": -0.27,
+   "w": 1.0
+  },
+  {
+   "n": "blueyellow/head3",
+   "anchor": [
+    0.14,
+    0.969
+   ],
+   "tilt": 0.55,
+   "w": 0.936
+  }
+ ],
+ "blueredyellow": [
+  {
+   "n": "blueredyellow/head1",
+   "anchor": [
+    0.458,
+    0.04
+   ],
+   "tilt": 0.0,
+   "w": 0.986
+  },
+  {
+   "n": "blueredyellow/head2",
+   "anchor": [
+    0.493,
+    0.024
+   ],
+   "tilt": 0.0,
+   "w": 0.996
+  },
+  {
+   "n": "blueredyellow/head3",
+   "anchor": [
+    0.466,
+    0.031
+   ],
+   "tilt": 0.0,
+   "w": 1.0
+  }
+ ]
+}

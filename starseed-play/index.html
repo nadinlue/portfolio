@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en" class="build-mobile">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<script>window.STAR_GARDEN_BUILD = {"mobile": true, "readOnly": true, "pixelRatio": 1.25, "maxTexture": 2048};</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Starseed Garden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,500..700,0..100;1,9..144,500..700,0..100&family=Caveat:wght@500..600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/starBook.css">
+<!-- Fetch the music modules and the big art file in parallel right away; the script at the end of <body>
+     decides the order they run in (music first). Add new js/music-tracks/ files here too (else just a bit slower). -->
+<link rel="modulepreload" href="js/music.js">
+<link rel="modulepreload" href="js/soundConfig.js">
+<link rel="modulepreload" href="js/chime.js">
+<link rel="modulepreload" href="js/music-tracks/index.js">
+<link rel="modulepreload" href="js/music-tracks/01-cozy-kalimba.js">
+<link rel="modulepreload" href="js/music-tracks/02-atmospheric.js">
+<link rel="preload" href="assets.js" as="script" fetchpriority="low">
+<link rel="preload" href="Assets/startscreen/startscreen_sky.webp" as="image" fetchpriority="high">
+<link rel="preload" href="Assets/startscreen/startscreen_city.webp" as="image" fetchpriority="high">
+<link rel="preload" href="Assets/startscreen/startscreen_logo.webp" as="image" fetchpriority="high">
+<link rel="preload" href="Assets/startscreen/startscreen_flowers.webp" as="image" fetchpriority="high">
+<link rel="modulepreload" href="js/startScreen.js">
+<link rel="modulepreload" href="js/tilt.js">
+</head>
+<body>
+<!-- Phones held upright: asks to turn the phone sideways (shown by style.css only in portrait on touch screens). -->
+<div class="rotate-hint" aria-live="polite"><div class="rotate-phone" aria-hidden="true"></div><p>Turn your phone sideways to play</p></div>
+<div class="stage" id="stage">
+<div class="vignette" id="vignette" aria-hidden="true"></div>
+<div class="interior" id="interior" role="img" aria-label="Inside the greenhouse"></div>
+<div class="title">
+  <h1>Starseed Garden</h1>
+  <p>2.5D parallax camera prototype</p>
+</div>
+<!-- Touch screens: the menu buttons below fold away behind this + button (top left); see the mobile menu in style.css. -->
+<button class="menu-toggle" id="btnMenuToggle" aria-expanded="false" aria-controls="topMenu" aria-label="Show the menu">+</button>
+<div class="top-menu" id="topMenu">
+<div class="sound-btns">
+  <button class="menu-btn" id="btnFullscreen" aria-pressed="false" title="Play in fullscreen / leave fullscreen">⛶ Fullscreen</button>
+  <button class="menu-btn music-btn" id="btnChimes" aria-pressed="false" title="Mute / unmute the star constellation sounds">✦ Chimes</button>
+  <button class="menu-btn music-btn" id="btnMusic" aria-pressed="false" title="Mute / unmute the background music">♪ Music</button>
+</div>
+<button class="menu-btn" id="btnDev" aria-pressed="false" title="Show or hide the dev tools and settings (M)">Dev</button>
+<button class="menu-btn sky-btn" id="btnDevSky" aria-pressed="false" title="Show or hide the background star look settings">Dev sky</button>
+<button class="menu-btn chart-btn" id="btnDevChart" aria-pressed="false" title="Show or hide the star chart look settings">Dev chart</button>
+<button class="menu-btn soundpanel-btn" id="btnDevSound" aria-pressed="false" title="Show or hide the night ambience sound settings">Dev sound</button>
+<button class="menu-btn roof-btn" id="btnDevRoof" title="Back down to the roof right away, whatever the sky is doing (for testing)">Dev roof ⌂</button>
+<button class="menu-btn skip-btn" id="btnSkip" title="Skip this constellation's echo game: its star appears right away (for testing)">Skip ⏭</button>
+</div>
+<button class="return-btn corner-btn" id="btnLeaveGreenhouse" tabindex="-1" title="Back to the rooftop (Esc)" aria-label="Leave the greenhouse">
+  <!-- just a roof with its chimney, a star above it -->
+  <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 24.5 16 14.5l11 10"/><path d="M20.5 18.6V12.5h4v9.7"/><path d="M9.5 6.5l1.25 2.75 2.75 1.25-2.75 1.25-1.25 2.75-1.25-2.75-2.75-1.25 2.75-1.25z" class="fill"/></svg>
+</button>
+<button class="return-btn grow-btn" id="btnGrow" tabindex="-1" title="Plant the three stars"><span class="grow-star">✦</span>Grow<span class="grow-star">✦</span></button>
+<button class="return-btn grow-btn" id="btnCarry" tabindex="-1" title="Carry the plant out to the garden"><span class="grow-star">✦</span>Carry it outside<span class="grow-star">✦</span></button>
+<button class="return-btn corner-btn" id="btnReturn" tabindex="-1" title="Back to the rooftop (Esc)" aria-label="Return to rooftop">
+  <!-- the same roof as the greenhouse's button -->
+  <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 24.5 16 14.5l11 10"/><path d="M20.5 18.6V12.5h4v9.7"/><path d="M9.5 6.5l1.25 2.75 2.75 1.25-2.75 1.25-1.25 2.75-1.25-2.75-2.75-1.25 2.75-1.25z" class="fill"/></svg>
+</button>
+<!-- Dev sound: the night ambience on the roof (citySound.js). Defaults = CITY_SOUND (soundConfig.js). -->
+<div class="settings sound-settings" id="soundSettings">
+  <h2>Dev sound</h2>
+  <h3 style="margin-top:4px; padding-top:0; border-top:0" title="The whole night ambience on the roof (fades out up in the sky)">Ambience</h3>
+  <label title="Overall level of the town and nature sounds"><span>Volume <output id="cityVolumeOut"></output></span>
+    <input type="range" id="cityVolume" min="0" max="100" step="1" value="70"></label>
+  <label title="Low = the town sounds far away and muffled, high = nearer and clearer"><span>Town distance (tone) <output id="as_toneOut"></output></span>
+    <input type="range" id="as_tone" min="300" max="5000" step="50" value="1400"></label>
+  <label title="At least this many seconds of quiet between two town / owl sounds"><span>Quiet between sounds <output id="as_minGapOut"></output></span>
+    <input type="range" id="as_minGap" min="0" max="60" step="1" value="15"></label>
+  <h3 title="A car passing far below">Car</h3>
+  <label><span>Level <output id="as_carLevelOut"></output></span>
+    <input type="range" id="as_carLevel" min="0" max="0.4" step="0.005" value="0.1"></label>
+  <label title="About how often it sounds (a random time around this)"><span>Every <output id="as_carEveryOut"></output></span>
+    <input type="range" id="as_carEvery" min="10" max="300" step="5" value="70"></label>
+  <div class="section-actions"><button data-play="car" title="Play it once now">▶ Play</button></div>
+  <h3 title="One to three faint barks, far off">Dog</h3>
+  <label><span>Level <output id="as_dogLevelOut"></output></span>
+    <input type="range" id="as_dogLevel" min="0" max="0.3" step="0.005" value="0.05"></label>
+  <label title="About how often it sounds (a random time around this)"><span>Every <output id="as_dogEveryOut"></output></span>
+    <input type="range" id="as_dogEvery" min="10" max="400" step="5" value="130"></label>
+  <div class="section-actions"><button data-play="dog" title="Play it once now">▶ Play</button></div>
+  <h3 title="A door closing somewhere below">Door</h3>
+  <label><span>Level <output id="as_doorLevelOut"></output></span>
+    <input type="range" id="as_doorLevel" min="0" max="0.3" step="0.005" value="0.06"></label>
+  <label title="About how often it sounds (a random time around this)"><span>Every <output id="as_doorEveryOut"></output></span>
+    <input type="range" id="as_doorEvery" min="10" max="400" step="5" value="110"></label>
+  <div class="section-actions"><button data-play="door" title="Play it once now">▶ Play</button></div>
+  <h3 title="A distant church bell">Church bell</h3>
+  <label><span>Level <output id="as_bellLevelOut"></output></span>
+    <input type="range" id="as_bellLevel" min="0" max="0.3" step="0.005" value="0.05"></label>
+  <label title="About how often it sounds (a random time around this)"><span>Every <output id="as_bellEveryOut"></output></span>
+    <input type="range" id="as_bellEvery" min="10" max="600" step="5" value="200"></label>
+  <div class="section-actions"><button data-play="bell" title="Play it once now">▶ Play</button></div>
+  <h3 title="Two soft hoots">Owl</h3>
+  <label><span>Level <output id="as_owlLevelOut"></output></span>
+    <input type="range" id="as_owlLevel" min="0" max="0.3" step="0.005" value="0.05"></label>
+  <label title="About how often it sounds (a random time around this)"><span>Every <output id="as_owlEveryOut"></output></span>
+    <input type="range" id="as_owlEvery" min="10" max="400" step="5" value="100"></label>
+  <div class="section-actions"><button data-play="owl" title="Play it once now">▶ Play</button></div>
+  <h3 title="Crickets on the roof: they sing together for a while, then fall silent">Crickets</h3>
+  <label><span>Level <output id="as_cricketsLevelOut"></output></span>
+    <input type="range" id="as_cricketsLevel" min="0" max="0.06" step="0.001" value="0.015"></label>
+  <label title="How loud they still are up in the sky, compared to the roof"><span>In the sky <output id="as_cricketsSkyOut"></output></span>
+    <input type="range" id="as_cricketsSky" min="0" max="100" step="5" value="100"></label>
+  <label title="How many crickets sing"><span>Voices <output id="as_cricketsVoicesOut"></output></span>
+    <input type="range" id="as_cricketsVoices" min="1" max="6" step="1" value="3"></label>
+  <label title="About how long they sing together"><span>Singing <output id="as_cricketsChorusOut"></output></span>
+    <input type="range" id="as_cricketsChorus" min="5" max="120" step="5" value="25"></label>
+  <label title="About how long they are all silent before singing again"><span>Silence <output id="as_cricketsQuietOut"></output></span>
+    <input type="range" id="as_cricketsQuiet" min="0" max="240" step="5" value="45"></label>
+  <div class="section-actions"><button data-play="crickets" title="Let them start singing now">▶ Sing now</button></div>
+</div>
+<!-- Dev chart: the star chart's look (starChart.js). Defaults = STAR_CHART.look (config.js). -->
+<div class="settings chart-settings" id="chartSettings">
+  <h2>Dev chart</h2>
+  <div class="section-actions" style="margin-top:0">
+    <button id="btnChartReplay" title="Draw the chart in again">Replay reveal</button>
+    <button id="btnChartOriginal" title="Every star chart setting back to the original look (your saves stay until you save again)">Original</button>
+  </div>
+  <h3 title="Searching the sky by hand between constellations (dragSearch.js, TELESCOPE.drag in config.js)">Sky search</h3>
+  <label title="How close (degrees) the scope must come to a waiting constellation before it settles onto it"><span>Settle within <output id="ss_captureDegOut"></output></span>
+    <input type="range" id="ss_captureDeg" min="1" max="15" step="0.5" value="5"></label>
+  <label title="A rim hint starts to fade in once its constellation is this close (degrees); stronger the closer"><span>Hint from <output id="ss_hintRangeOut"></output></span>
+    <input type="range" id="ss_hintRange" min="15" max="90" step="1" value="45"></label>
+  <label title="Still searching after this long: every rim hint fades in to show the way"><span>Help after <output id="ss_hintAfterOut"></output></span>
+    <input type="range" id="ss_hintAfter" min="2" max="30" step="0.5" value="8"></label>
+  <h3 title="The chart's lines">Ink</h3>
+  <label class="color">Color <input type="color" id="sc_color" value="#b36319"></label>
+  <label class="color" title="Additive adds light; Screen lightens softly; Normal lays the ink over the sky">Blend
+    <select id="sc_blend"><option value="additive" selected>Additive</option><option value="screen">Screen</option><option value="normal">Normal</option></select></label>
+  <label><span>Opacity <output id="sc_opacityOut"></output></span>
+    <input type="range" id="sc_opacity" min="0" max="2.5" step="0.05" value="0.2"></label>
+  <label><span>Width <output id="sc_widthOut"></output></span>
+    <input type="range" id="sc_width" min="0.2" max="4" step="0.05" value="3.4"></label>
+  <label title="The ink hue drifts across the sky by up to this many degrees"><span>Hue shift <output id="sc_hueOut"></output></span>
+    <input type="range" id="sc_hue" min="0" max="180" step="1" value="66"></label>
+  <label title="How quickly the hue changes over the sky"><span>Hue scale <output id="sc_hueScaleOut"></output></span>
+    <input type="range" id="sc_hueScale" min="0.2" max="4" step="0.05" value="1"></label>
+  <label title="How rich the shifted tints get"><span>Hue richness <output id="sc_hueSatOut"></output></span>
+    <input type="range" id="sc_hueSat" min="0" max="4" step="0.05" value="0.7"></label>
+  <label title="The framing ring takes the constellation’s color"><span>Ring tint <output id="sc_tintOut"></output></span>
+    <input type="range" id="sc_tint" min="0" max="1" step="0.05" value="0.65"></label>
+  <label title="How far the ring tint fades out into the chart"><span>Tint fade <output id="sc_tintFadeOut"></output></span>
+    <input type="range" id="sc_tintFade" min="0" max="1" step="0.05" value="0.1"></label>
+  <h3 title="The highlight wave when a constellation is echoed fully in rhythm">In rhythm pulse</h3>
+  <div class="section-actions" style="margin-top:0">
+    <button id="btnChartPulse" title="Play the in-rhythm highlight wave now">Test pulse</button>
+  </div>
+  <label title="How much brighter the lines get as the wave passes (0 = only recoloured)"><span>Strength <output id="sc_pulseOut"></output></span>
+    <input type="range" id="sc_pulse" min="0" max="30" step="0.1" value="10"></label>
+  <label title="How pure the constellation's color gets in the wave (1 = its pure hue: stays colored however bright)"><span>Color purity <output id="sc_pulseSatOut"></output></span>
+    <input type="range" id="sc_pulseSat" min="0" max="1" step="0.05" value="0.85"></label>
+  <label title="How far the wave travels (× the ring's radius)"><span>Reach <output id="sc_pulseReachOut"></output></span>
+    <input type="range" id="sc_pulseReach" min="1" max="8" step="0.1" value="3.2"></label>
+  <label title="How wide the wave is (× the ring's radius)"><span>Width <output id="sc_pulseWidthOut"></output></span>
+    <input type="range" id="sc_pulseWidth" min="0.1" max="2" step="0.05" value="0.5"></label>
+  <label><span>Duration <output id="sc_pulseSecOut"></output></span>
+    <input type="range" id="sc_pulseSec" min="0.5" max="6" step="0.1" value="2.4"></label>
+  <h3 title="The highlight wave when the constellation's star appears">Star appears pulse</h3>
+  <div class="section-actions" style="margin-top:0">
+    <button id="btnChartStarPulse" title="Play the star-appears highlight wave now">Test pulse</button>
+  </div>
+  <label title="How much brighter the lines get as the wave passes (0 = only recoloured)"><span>Strength <output id="sc_starPulseOut"></output></span>
+    <input type="range" id="sc_starPulse" min="0" max="30" step="0.1" value="10"></label>
+  <label title="How pure the constellation's color gets in the wave (1 = its pure hue: stays colored however bright)"><span>Color purity <output id="sc_starPulseSatOut"></output></span>
+    <input type="range" id="sc_starPulseSat" min="0" max="1" step="0.05" value="0.85"></label>
+  <label title="How far the wave travels (× the ring's radius)"><span>Reach <output id="sc_starPulseReachOut"></output></span>
+    <input type="range" id="sc_starPulseReach" min="1" max="8" step="0.1" value="3.2"></label>
+  <label title="How wide the wave is (× the ring's radius)"><span>Width <output id="sc_starPulseWidthOut"></output></span>
+    <input type="range" id="sc_starPulseWidth" min="0.1" max="2" step="0.05" value="0.5"></label>
+  <label><span>Duration <output id="sc_starPulseSecOut"></output></span>
+    <input type="range" id="sc_starPulseSec" min="0.5" max="6" step="0.1" value="2.4"></label>
+  <h3 title="A wide, faint second pass around the lines">Glow</h3>
+  <label><span>Glow <output id="sc_glowOut"></output></span>
+    <input type="range" id="sc_glow" min="0" max="3" step="0.05" value="1.3"></label>
+  <label><span>Glow size <output id="sc_glowSizeOut"></output></span>
+    <input type="range" id="sc_glowSize" min="1.5" max="16" step="0.05" value="9.55"></label>
+  <label><span>Glow soft <output id="sc_glowSoftOut"></output></span>
+    <input type="range" id="sc_glowSoft" min="0" max="1" step="0.05" value="0.15"></label>
+  <label class="color">Glow color <input type="color" id="sc_glowColor" value="#7473de"></label>
+  <label class="color">Glow blend
+    <select id="sc_glowBlend"><option value="additive" selected>Additive</option><option value="screen">Screen</option><option value="normal">Normal</option></select></label>
+  <h3 title="Soft gaps along the lines, and dots floating in short gaps">Breaks</h3>
+  <label><span>Breaks <output id="sc_breaksOut"></output></span>
+    <input type="range" id="sc_breaks" min="0" max="1" step="0.05" value="0.15"></label>
+  <label><span>Break width <output id="sc_breakWidthOut"></output></span>
+    <input type="range" id="sc_breakWidth" min="0.1" max="2.5" step="0.05" value="0.25"></label>
+  <label><span>Break fade <output id="sc_breakFadeOut"></output></span>
+    <input type="range" id="sc_breakFade" min="0" max="1" step="0.05" value="0.05"></label>
+  <label><span>Dot breaks <output id="sc_dotBreaksOut"></output></span>
+    <input type="range" id="sc_dotBreaks" min="0" max="6" step="0.05" value="1.1"></label>
+  <h3 title="Brush strokes instead of clean lines (Brush button in the sky, key V)">Brush</h3>
+  <label title="Line width with the brush (× the clean line)"><span>Brush width <output id="sc_brushWidthOut"></output></span>
+    <input type="range" id="sc_brushWidth" min="1" max="6" step="0.05" value="1.6"></label>
+  <label title="Bristle streaks along the stroke"><span>Bristles <output id="sc_brushGrainOut"></output></span>
+    <input type="range" id="sc_brushGrain" min="0" max="1" step="0.05" value="0.05"></label>
+  <label title="Ragged edges"><span>Ragged <output id="sc_brushRagOut"></output></span>
+    <input type="range" id="sc_brushRag" min="0" max="1" step="0.05" value="1"></label>
+  <label title="How dry the paint runs towards the end of each stroke"><span>Dry brush <output id="sc_brushDryOut"></output></span>
+    <input type="range" id="sc_brushDry" min="0" max="1" step="0.05" value="0.7"></label>
+  <label title="Length of one stroke (× the line width)"><span>Stroke length <output id="sc_brushStrokeOut"></output></span>
+    <input type="range" id="sc_brushStroke" min="5" max="120" step="1" value="120"></label>
+  <label title="Size of the soft breaks and dot gaps while the brush is on (× their usual size)"><span>Brush breaks <output id="sc_brushBreaksOut"></output></span>
+    <input type="range" id="sc_brushBreaks" min="0" max="1" step="0.05" value="0.65"></label>
+  <h3 title="Size and lean of the map; these rebuild it when the slider is let go">Shape</h3>
+  <label><span>Size <output id="sc_sizeOut"></output></span>
+    <input type="range" id="sc_size" min="0.5" max="2" step="0.05" value="1.6"></label>
+  <label title="How closely the map's circle systems pack (more = closer together, more of them)"><span>Density <output id="sc_densityOut"></output></span>
+    <input type="range" id="sc_density" min="0.6" max="1.6" step="0.05" value="1"></label>
+  <label><span>Lean back <output id="sc_tiltOut"></output></span>
+    <input type="range" id="sc_tilt" min="0" max="1.4" step="0.05" value="0.95"></label>
+  <label title="The constellation leans into space with the chart: 0 = flat on the sky, 1 = the chart’s tilt"><span>Star 3D <output id="sc_star3dOut"></output></span>
+    <input type="range" id="sc_star3d" min="0" max="3" step="0.05" value="1"></label>
+  <label title="Its stars while the chart is shown (× their usual size)"><span>Star size <output id="sc_starScaleOut"></output></span>
+    <input type="range" id="sc_starScale" min="0.3" max="1.5" step="0.01" value="1.15"></label>
+  <label title="How fast the circle systems turn (0 = still)"><span>Spin <output id="sc_spinOut"></output></span>
+    <input type="range" id="sc_spin" min="0" max="10" step="0.05" value="2.95"></label>
+  <h3 title="How the chart appears and where it fades out">Reveal</h3>
+  <label title="Seconds for the chart to draw in"><span>Reveal (s) <output id="sc_revealSecOut"></output></span>
+    <input type="range" id="sc_revealSec" min="0.5" max="10" step="0.1" value="3.2"></label>
+  <label title="Lines are gone below this elevation (degrees), above the rooftops"><span>Fade from <output id="sc_fadeLowOut"></output></span>
+    <input type="range" id="sc_fadeLow" min="-10" max="60" step="1" value="14"></label>
+  <label title="… and fully shown from this elevation"><span>Fade to <output id="sc_fadeHighOut"></output></span>
+    <input type="range" id="sc_fadeHigh" min="-5" max="70" step="1" value="25"></label>
+</div>
+<!-- Dev sky: the look of the background sky stars (not the constellations). Defaults = SKY_LOOK.stars (config.js). -->
+<div class="settings sky-settings" id="skySettings">
+  <h2>Dev sky</h2>
+  <h3 style="margin-top:4px; padding-top:0; border-top:0" title="Small soft points in the sky's own muted hues">Star dots</h3>
+  <label title="How many dots: 100% = the usual number, up to twice as many, 0 = none. Twinkle stars have their own amount"><span>Amount <output id="skyDotAmountOut"></output></span>
+    <input type="range" id="skyDotAmount" min="0" max="2" step="0.05" value="1"></label>
+  <label title="0 = grey, 1 = the muted colors as chosen, above = more intense"><span>Color strength <output id="skyDotColorAmtOut"></output></span>
+    <input type="range" id="skyDotColorAmt" min="0" max="1.5" step="0.05" value="1"></label>
+  <label title="How white the dot's body is: 0 = its own color, 1 = white"><span>Body white <output id="skyDotBodyWhiteOut"></output></span>
+    <input type="range" id="skyDotBodyWhite" min="0" max="1" step="0.05" value="0.2"></label>
+  <label title="How colorful the dot's glow is: 0 = grey, 1 = its color, above = more intense"><span>Glow color <output id="skyDotGlowColorOut"></output></span>
+    <input type="range" id="skyDotGlowColor" min="0" max="2" step="0.05" value="1.2"></label>
+  <label title="The share of dots that lean to another hue, each to one of this sky scheme's two (high up only; the rest keep their own color)"><span>Hue stars <output id="skyDotHueShareOut"></output></span>
+    <input type="range" id="skyDotHueShare" min="0" max="1" step="0.05" value="0.35"></label>
+  <label title="How far those dots lean to their hue"><span>Hue shift <output id="skyDotSkyHueOut"></output></span>
+    <input type="range" id="skyDotSkyHue" min="0" max="1" step="0.05" value="0.5"></label>
+  <label><span>Brightness <output id="skyDotBrightOut"></output></span>
+    <input type="range" id="skyDotBright" min="0" max="3" step="0.05" value="1"></label>
+  <label><span>Size <output id="skyDotSizeOut"></output></span>
+    <input type="range" id="skyDotSize" min="0.3" max="3" step="0.05" value="1"></label>
+  <label title="The slight soft halo around each dot"><span>Glow <output id="skyDotGlowOut"></output></span>
+    <input type="range" id="skyDotGlow" min="0" max="1" step="0.05" value="0.25"></label>
+  <label title="How far the slow breath dims a dot (0 = none)"><span>Breathe <output id="skyDotBreatheOut"></output></span>
+    <input type="range" id="skyDotBreathe" min="0" max="1" step="0.05" value="0.35"></label>
+  <label title="About this many seconds per breath"><span>Breath length <output id="skyDotBreatheSecOut"></output></span>
+    <input type="range" id="skyDotBreatheSec" min="2" max="20" step="0.5" value="7"></label>
+  <label title="How far the quicker wobble dims a dot (0 = steady)"><span>Twinkle <output id="skyDotTwinkleOut"></output></span>
+    <input type="range" id="skyDotTwinkle" min="0" max="1" step="0.05" value="0.3"></label>
+  <label class="color" title="Both kinds of star. Tint keeps the star's hue over the blue night; Additive brightens towards white">Blend
+    <select id="skyStarBlend"><option value="normal">Tint</option><option value="additive" selected>Additive</option></select></label>
+  <h3 title="Big soft color shapes in the high sky (SKY_LOOK.color); the sky near the city stays blue">Sky color</h3>
+  <label class="color" title="Either scheme by chance on each trip to the sky, or always this one">Scheme
+    <select id="skyColorScheme"><option value="auto" selected>Changes each trip</option><option value="green">Blue-green</option><option value="purple">Blue-purple</option></select></label>
+  <label title="How strongly the color shows over the blue (0 = none)"><span>Strength <output id="skyColorStrengthOut"></output></span>
+    <input type="range" id="skyColorStrength" min="0" max="2" step="0.05" value="1"></label>
+  <label title="How high up the sky (degrees) the color starts; below this the sky is its own blue"><span>Starts at <output id="skyColorFromOut"></output></span>
+    <input type="range" id="skyColorFrom" min="0" max="70" step="1" value="26"></label>
+  <label title="How high up the sky (degrees) the color reaches full strength: higher = a longer, softer fade"><span>Full at <output id="skyColorFullOut"></output></span>
+    <input type="range" id="skyColorFull" min="10" max="90" step="1" value="46"></label>
+  <h3 title="The band across the sky; its colors follow the sky scheme above">Milky Way</h3>
+  <label class="toggle"><input type="checkbox" id="milkyOn" checked> Show</label>
+  <label title="All of it: how strongly it lies over the sky"><span>Strength <output id="milkyStrengthOut"></output></span>
+    <input type="range" id="milkyStrength" min="0" max="2" step="0.05" value="1"></label>
+  <label title="How wide the band is"><span>Width <output id="milkyWidthOut"></output></span>
+    <input type="range" id="milkyWidth" min="0.1" max="0.7" step="0.01" value="0.24"></label>
+  <label title="How far the dark body covers the sky"><span>Dark body <output id="milkyDeepOut"></output></span>
+    <input type="range" id="milkyDeep" min="0" max="1" step="0.05" value="0.7"></label>
+  <label title="How far the band's mottled glow covers the sky"><span>Glow <output id="milkyRibbonOut"></output></span>
+    <input type="range" id="milkyRibbon" min="0" max="1" step="0.05" value="0.7"></label>
+  <label title="How far the soft clouds cover the sky"><span>Clouds <output id="milkyWarmOut"></output></span>
+    <input type="range" id="milkyWarm" min="0" max="1" step="0.05" value="0.6"></label>
+  <label title="How high up the sky (degrees) its highest point is: 90 = straight over the top"><span>Highest point <output id="milkyPeakOut"></output></span>
+    <input type="range" id="milkyPeak" min="20" max="90" step="1" value="70"></label>
+  <label title="Which way its highest point lies (degrees; 0 = straight ahead from the roof, + = to the right)"><span>Direction <output id="milkyAzOut"></output></span>
+    <input type="range" id="milkyAz" min="-180" max="180" step="1" value="50"></label>
+  <label title="How high up the sky (degrees) it starts: above the high wisps"><span>Starts at <output id="milkyFromOut"></output></span>
+    <input type="range" id="milkyFrom" min="0" max="70" step="1" value="28"></label>
+  <label title="How high up the sky (degrees) it is at full strength: higher = a longer, softer fade"><span>Full at <output id="milkyFullOut"></output></span>
+    <input type="range" id="milkyFull" min="5" max="90" step="1" value="40"></label>
+  <label class="color" title="Blue-green sky: the dark body">Blue-green: body <input type="color" id="milky_green_deep" value="#0b1a48"></label>
+  <label class="color" title="Blue-green sky: the glow">Blue-green: glow <input type="color" id="milky_green_ribbon" value="#1f6a78"></label>
+  <label class="color" title="Blue-green sky: the brighter clumps in the glow">Blue-green: bright clumps <input type="color" id="milky_green_ribbonHi" value="#4a9ea3"></label>
+  <label class="color" title="Blue-green sky: the soft clouds">Blue-green: clouds <input type="color" id="milky_green_warm" value="#e8907f"></label>
+  <label class="color" title="Blue-purple sky: the dark body">Blue-purple: body <input type="color" id="milky_purple_deep" value="#15114a"></label>
+  <label class="color" title="Blue-purple sky: the glow">Blue-purple: glow <input type="color" id="milky_purple_ribbon" value="#4636b0"></label>
+  <label class="color" title="Blue-purple sky: the brighter clumps in the glow">Blue-purple: bright clumps <input type="color" id="milky_purple_ribbonHi" value="#8a62da"></label>
+  <label class="color" title="Blue-purple sky: the soft clouds">Blue-purple: clouds <input type="color" id="milky_purple_warm" value="#c46ad2"></label>
+  <h3 title="The outlines of the Milky Way's layers: from soft and misty to stylized, painterly shapes">Milky Way edges</h3>
+  <label title="A ragged, brushy fringe on the hard edges (needs some hardness)"><span>Brush grain <output id="mweGrainOut"></output></span>
+    <input type="range" id="mweGrain" min="0" max="1" step="0.05" value="0"></label>
+  <label title="The dark body's edge: 0 = soft and misty, 1 = a crisp cut-paper edge"><span>Body: hardness <output id="mweHardBodyOut"></output></span>
+    <input type="range" id="mweHardBody" min="0" max="1" step="0.05" value="0"></label>
+  <label title="The glow's edge: 0 = soft and misty, 1 = a crisp cut-paper edge"><span>Glow: hardness <output id="mweHardGlowOut"></output></span>
+    <input type="range" id="mweHardGlow" min="0" max="1" step="0.05" value="0"></label>
+  <label title="The bright clumps' edge: 0 = soft and misty, 1 = a crisp cut-paper edge"><span>Clumps: hardness <output id="mweHardClumpsOut"></output></span>
+    <input type="range" id="mweHardClumps" min="0" max="1" step="0.05" value="0"></label>
+  <label title="The clouds' edge: 0 = soft and misty, 1 = a crisp cut-paper edge"><span>Clouds: hardness <output id="mweHardCloudsOut"></output></span>
+    <input type="range" id="mweHardClouds" min="0" max="1" step="0.05" value="0"></label>
+  <h3 title="The dots and twinkle stars along the Milky Way, on top of the Star dots and Twinkle stars looks">Milky Way stars</h3>
+  <label title="How many dots along the band (× the Star dots amount)"><span>Dots <output id="milkyStarsOut"></output></span>
+    <input type="range" id="milkyStars" min="0" max="2" step="0.05" value="1"></label>
+  <label title="How many twinkle stars along the band (× the Twinkle stars amount; at most 4×)"><span>Twinkle stars <output id="mwsTwAmountOut"></output></span>
+    <input type="range" id="mwsTwAmount" min="0" max="4" step="0.05" value="1"></label>
+  <label title="How far the dense middle reaches across the band (× its width; placed anew when let go)"><span>Center spread <output id="mwsSpreadOut"></output></span>
+    <input type="range" id="mwsSpread" min="0.1" max="3" step="0.05" value="1"></label>
+  <label title="How far the sparse outer stars reach across the band (× its width; placed anew when let go)"><span>Edge spread <output id="mwsEdgeSpreadOut"></output></span>
+    <input type="range" id="mwsEdgeSpread" min="0.2" max="6" step="0.05" value="2.5"></label>
+  <label title="Share of its stars in the sparse outer part: 0 = all in the middle (placed anew when let go)"><span>Edge stars <output id="mwsEdgeShareOut"></output></span>
+    <input type="range" id="mwsEdgeShare" min="0" max="1" step="0.05" value="0.25"></label>
+  <label title="How unevenly they bunch along the band: 0 = even, 1 = in clusters with gaps (placed anew when let go)"><span>Clumps <output id="mwsClumpOut"></output></span>
+    <input type="range" id="mwsClump" min="0" max="1" step="0.05" value="0.35"></label>
+  <label title="Size of its dots (× Star dots size)"><span>Dot size <output id="mwsDotSizeOut"></output></span>
+    <input type="range" id="mwsDotSize" min="0.2" max="3" step="0.05" value="1"></label>
+  <label title="Brightness of its dots (× Star dots brightness)"><span>Dot brightness <output id="mwsDotBrightOut"></output></span>
+    <input type="range" id="mwsDotBright" min="0" max="3" step="0.05" value="1"></label>
+  <label title="Size of its twinkle stars (× Twinkle stars size)"><span>Twinkle size <output id="mwsTwSizeOut"></output></span>
+    <input type="range" id="mwsTwSize" min="0.2" max="3" step="0.05" value="1"></label>
+  <label title="How far the twinkle cross reaches past its dot (the dot keeps its size)"><span>Twinkle cross <output id="mwsTwCrossOut"></output></span>
+    <input type="range" id="mwsTwCross" min="0.5" max="4" step="0.05" value="1.6"></label>
+  <label title="Brightness of its twinkle stars (× Twinkle stars brightness)"><span>Twinkle brightness <output id="mwsTwBrightOut"></output></span>
+    <input type="range" id="mwsTwBright" min="0" max="3" step="0.05" value="1"></label>
+  <label title="How far they lean to the band's own colors (its bright clumps and clouds): 0 = the usual star colors"><span>Band tint <output id="mwsTintOut"></output></span>
+    <input type="range" id="mwsTint" min="0" max="1" step="0.05" value="0"></label>
+  <h3 title="Rare small crosses with a glow in the middle; while one twinkles, the fade of its rays gets longer">Twinkle stars</h3>
+  <label title="Share of all background stars"><span>Amount <output id="skyTwShareOut"></output></span>
+    <input type="range" id="skyTwShare" min="0" max="0.12" step="0.005" value="0.03"></label>
+  <label title="How white the star's body is: 0 = its own color, 1 = white"><span>Body white <output id="skyTwBodyWhiteOut"></output></span>
+    <input type="range" id="skyTwBodyWhite" min="0" max="1" step="0.05" value="0.35"></label>
+  <label title="How colorful its glow and rays are: 0 = grey, 1 = its color, above = more intense"><span>Glow color <output id="skyTwGlowColorOut"></output></span>
+    <input type="range" id="skyTwGlowColor" min="0" max="4" step="0.05" value="1.2"></label>
+  <label title="The share of twinkle stars that lean to another hue, each to one of this sky scheme's two (high up only; the rest keep their own color)"><span>Hue stars <output id="skyTwHueShareOut"></output></span>
+    <input type="range" id="skyTwHueShare" min="0" max="1" step="0.05" value="0.5"></label>
+  <label title="How far those stars lean to their hue"><span>Hue shift <output id="skyTwSkyHueOut"></output></span>
+    <input type="range" id="skyTwSkyHue" min="0" max="1" step="0.05" value="0.5"></label>
+  <label><span>Brightness <output id="skyTwBrightOut"></output></span>
+    <input type="range" id="skyTwBright" min="0" max="3" step="0.05" value="1"></label>
+  <label title="The plain dot between twinkles (px, the star dots are about 0.5 to 1)"><span>Dot size <output id="skyTwDotOut"></output></span>
+    <input type="range" id="skyTwDot" min="0.5" max="4" step="0.05" value="1.3"></label>
+  <label title="The cross while it twinkles"><span>Cross size <output id="skyTwSizeOut"></output></span>
+    <input type="range" id="skyTwSize" min="0.3" max="3" step="0.05" value="1"></label>
+  <label title="How far it reaches at the height of a twinkle"><span>Ray fade twinkling <output id="skyTwFlareOut"></output></span>
+    <input type="range" id="skyTwFlare" min="0.05" max="1" step="0.01" value="0.38"></label>
+  <label><span>Ray thickness <output id="skyTwThinOut"></output></span>
+    <input type="range" id="skyTwThin" min="0.01" max="0.1" step="0.005" value="0.035"></label>
+  <label><span>Center glow <output id="skyTwGlowOut"></output></span>
+    <input type="range" id="skyTwGlow" min="0" max="1" step="0.05" value="0.3"></label>
+  <label title="About this many seconds between a star's twinkles"><span>Twinkle every <output id="skyTwEveryOut"></output></span>
+    <input type="range" id="skyTwEvery" min="3" max="30" step="0.5" value="9"></label>
+  <label title="Seconds one twinkle lasts"><span>Twinkle length <output id="skyTwSecOut"></output></span>
+    <input type="range" id="skyTwSec" min="0.5" max="6" step="0.1" value="2.4"></label>
+  <h3 title="A hint of depth as the telescope turns: how much faster than the constellations each part slides (0.03 = 3% faster, below 0 = slower). The constellations and chart stay rigid">Sky parallax</h3>
+  <label title="The tiniest background stars; each star in between goes by its size"><span>Smallest stars <output id="skyParSmallOut"></output></span>
+    <input type="range" id="skyParSmall" min="-0.1" max="0.1" step="0.005" value="-0.02"></label>
+  <label title="The biggest background stars"><span>Biggest stars <output id="skyParBigOut"></output></span>
+    <input type="range" id="skyParBig" min="-0.1" max="0.1" step="0.005" value="0.03"></label>
+  <label title="The Milky Way, its dust and the nebula cloud"><span>Milky Way <output id="skyParMilkyWayOut"></output></span>
+    <input type="range" id="skyParMilkyWay" min="-0.1" max="0.1" step="0.005" value="-0.035"></label>
+  <label title="The painted sky with the moon, halo and wisps"><span>Moon + wisps <output id="skyParBackdropOut"></output></span>
+    <input type="range" id="skyParBackdrop" min="-0.1" max="0.1" step="0.005" value="0.015"></label>
+  <h3 title="Size of the constellation you play, its stars and its lines (CONSTELLATION_STYLE)">Constellation</h3>
+  <label title="The whole shape: how far apart its stars lie (× its usual size). Applies when the slider is let go"><span>Constellation size <output id="conShapeScaleOut"></output></span>
+    <input type="range" id="conShapeScale" min="0.4" max="2.5" step="0.05" value="1"></label>
+  <label title="Each star on its own (× its usual size); the shape stays as it is"><span>Star size <output id="conStarScaleOut"></output></span>
+    <input type="range" id="conStarScale" min="0.3" max="3" step="0.05" value="1"></label>
+  <label title="The lines between the stars (× their usual thickness)"><span>Line thickness <output id="conLineScaleOut"></output></span>
+    <input type="range" id="conLineScale" min="0.2" max="5" step="0.05" value="1"></label>
+  <h3 title="How the collected star appears after a finished constellation (STAR_DELIVERY)">Star reveal</h3>
+  <div class="section-actions">
+    <button id="btnRingStyle" title="Switch the ripple between the supernova ring and the earlier soft ring">Ring: Supernova</button>
+    <button id="btnRevealShow" title="Play the star reveal now (next element each time; no star is added to a net)">Show reveal</button>
+  </div>
+  <label title="Size of the star while it shows itself (screen heights)"><span>Star size <output id="rvSizeOut"></output></span>
+    <input type="range" id="rvSize" min="0.06" max="0.3" step="0.01" value="0.16"></label>
+  <label title="How long the classic reveal lasts before the star flies off"><span>Hover time (s) <output id="rvSecOut"></output></span>
+    <input type="range" id="rvSec" min="0.6" max="3" step="0.05" value="1.5"></label>
+  <label title="Number of soft rings"><span>Ripples <output id="rvRingsOut"></output></span>
+    <input type="range" id="rvRings" min="0" max="2" step="1" value="2"></label>
+  <label title="How far the rings spread (x star size)"><span>Ripple size <output id="rvRingSizeOut"></output></span>
+    <input type="range" id="rvRingSize" min="1" max="5" step="0.1" value="2.8"></label>
+  <label><span>Ripple gap (s) <output id="rvRingGapOut"></output></span>
+    <input type="range" id="rvRingGap" min="0" max="1" step="0.02" value="0.3"></label>
+  <label><span>Ripple time (s) <output id="rvRingSecOut"></output></span>
+    <input type="range" id="rvRingSec" min="0.3" max="3" step="0.05" value="1.3"></label>
+  <label><span>Ripple brightness <output id="rvRingBrightOut"></output></span>
+    <input type="range" id="rvRingBright" min="0" max="1.5" step="0.05" value="0.6"></label>
+  <label title="Brightness of the ripple's edge alone (Ripple brightness scales edge and trail together)"><span>Ripple edge brightness <output id="rvRingEdgeOut"></output></span>
+    <input type="range" id="rvRingEdge" min="0" max="3" step="0.05" value="1"></label>
+  <label title="Low = a crisp, fine edge; high = a wide, soft glowing band"><span>Ripple edge softness <output id="rvRingEdgeSoftOut"></output></span>
+    <input type="range" id="rvRingEdgeSoft" min="0.3" max="5" step="0.05" value="1"></label>
+  <label title="How far the light trails in behind the ripple's edge, like a supernova"><span>Ripple trail <output id="rvRingTrailOut"></output></span>
+    <input type="range" id="rvRingTrail" min="0" max="1" step="0.02" value="0.4"></label>
+  <label title="How much the ripple's light shifts in hue from its edge into the trail"><span>Ripple hue shift <output id="rvRingHueOut"></output></span>
+    <input type="range" id="rvRingHue" min="-0.25" max="0.25" step="0.01" value="0.08"></label>
+  <label><span>Particles <output id="rvSparklesOut"></output></span>
+    <input type="range" id="rvSparkles" min="0" max="40" step="1" value="14"></label>
+  <label title="How far the particles drift out (screen heights)"><span>Particle distance <output id="rvSparkDistOut"></output></span>
+    <input type="range" id="rvSparkDist" min="0.05" max="0.6" step="0.01" value="0.3"></label>
+  <label><span>Particle size <output id="rvSparkSizeOut"></output></span>
+    <input type="range" id="rvSparkSize" min="0.01" max="0.12" step="0.005" value="0.04"></label>
+  <label><span>Particle time (s) <output id="rvSparkSecOut"></output></span>
+    <input type="range" id="rvSparkSec" min="0.4" max="3" step="0.05" value="1.6"></label>
+  <label title="How much the particles curl around while drifting out"><span>Swirl <output id="rvSwirlOut"></output></span>
+    <input type="range" id="rvSwirl" min="0" max="3" step="0.05" value="1.1"></label>
+  <h3 title="Look and frequency of the shooting stars (SKY_LOOK.meteors)">Shooting stars</h3>
+  <div class="section-actions">
+    <button id="btnMeteorShoot" title="Send one shooting star across the sky now">Shoot one</button>
+    <button id="btnCometShoot" title="Send one comet across the sky now">Send a comet</button>
+  </div>
+  <label title="How often shooting stars cross the sky (also switched on/off in Settings → Night sky)"><span>Shooting stars / min <output id="shootingRateOut"></output></span>
+    <input type="range" id="shootingRate" min="0" max="40" step="1" value="3"></label>
+  <label title="How often a comet crosses the sky: rarer and slower than the shooting stars (SKY_LOOK.comets)"><span>Comets / min <output id="skyCometRateOut"></output></span>
+    <input type="range" id="skyCometRate" min="0" max="6" step="0.25" value="0.75"></label>
+  <h3 title="Sparks that shooting stars shed, curling away (AMBIENT.stardust)">Stardust trails</h3>
+  <label title="Also on/off with Settings → Ambient FX"><span>Strength <output id="amb_stardustOut"></output></span>
+    <input type="range" id="amb_stardust" min="0" max="200" step="5" value="100"></label>
+  <label class="color" title="Every spark is blended towards this color by Tint amount">Tint <input type="color" id="dustTint" value="#ffe2a6"></label>
+  <label title="0 = the shooting star's own color"><span>Tint amount <output id="dustTintAmtOut"></output></span>
+    <input type="range" id="dustTintAmt" min="0" max="1" step="0.05" value="0"></label>
+  <label><span>Size <output id="dustSizeOut"></output></span>
+    <input type="range" id="dustSize" min="0.3" max="3" step="0.05" value="1"></label>
+  <label title="Soft halo around each spark"><span>Glow <output id="dustGlowOut"></output></span>
+    <input type="range" id="dustGlow" min="0" max="2" step="0.05" value="0.4"></label>
+  <label title="How many sparks a bright shooting star sheds per second"><span>Sparks / second <output id="dustRateOut"></output></span>
+    <input type="range" id="dustRate" min="0" max="800" step="5" value="300"></label>
+  <label title="How long the sparks linger behind the shooting star (× their lifetime, so they also drift further)"><span>Trail length <output id="dustLifeOut"></output></span>
+    <input type="range" id="dustLife" min="0.2" max="3" step="0.05" value="1"></label>
+  <label title="How fast the sparks drift sideways away from the trail (higher = the trail widens more)"><span>Spread <output id="dustSpreadOut"></output></span>
+    <input type="range" id="dustSpread" min="0" max="0.08" step="0.001" value="0.03"></label>
+  <label title="How strongly the sparks curl away (0 = they stay in a straight trail)"><span>Curl <output id="dustCurlOut"></output></span>
+    <input type="range" id="dustCurl" min="0" max="5" step="0.1" value="0"></label>
+  <h3 title="Soft breathing glow and a faint broken ring around the moon (AMBIENT.moonHalo)">Moon halo</h3>
+  <label title="Also on/off with Settings → Ambient FX"><span>Strength <output id="amb_moonHaloOut"></output></span>
+    <input type="range" id="amb_moonHalo" min="0" max="200" step="5" value="100"></label>
+  <label class="color">Glow color <input type="color" id="moonColor" value="#bcd2ff"></label>
+  <label title="Strength of the soft glow around the moon"><span>Glow <output id="moonGlowAmtOut"></output></span>
+    <input type="range" id="moonGlowAmt" min="0" max="1" step="0.01" value="0.32"></label>
+  <label><span>Glow size <output id="moonGlowSizeOut"></output></span>
+    <input type="range" id="moonGlowSize" min="0.3" max="2.5" step="0.05" value="1"></label>
+  <label class="color">Ring color <input type="color" id="moonRingColor" value="#ffe9c4"></label>
+  <label title="Strength of the faint broken ring"><span>Ring <output id="moonRingAmtOut"></output></span>
+    <input type="range" id="moonRingAmt" min="0" max="0.4" step="0.01" value="0.06"></label>
+  <label><span>Ring radius <output id="moonRingOut"></output></span>
+    <input type="range" id="moonRing" min="0.3" max="0.95" step="0.01" value="0.72"></label>
+  <label title="Seconds per slow breath of the glow"><span>Breathe (s) <output id="moonBreatheOut"></output></span>
+    <input type="range" id="moonBreathe" min="2" max="30" step="0.5" value="9"></label>
+  <h3 title="Faint cirrus streaks drifting across the upper sky (AMBIENT.wisps)">High wisps</h3>
+  <label title="Also on/off with Settings → Ambient FX"><span>Strength <output id="amb_wispsOut"></output></span>
+    <input type="range" id="amb_wisps" min="0" max="200" step="5" value="100"></label>
+  <label class="color" title="Color of the thin, faint parts">Color <input type="color" id="wispColor" value="#d9d4ff"></label>
+  <label class="color" title="Color of the denser cores (same as Color = one tone)">Core color <input type="color" id="wispColor2" value="#d9d4ff"></label>
+  <label class="color" title="Normal lays them over the sky; Additive adds light; Screen lightens softly; Glow keeps the hue and still glows">Blend
+    <select id="wispBlend"><option value="normal" selected>Normal</option><option value="additive">Additive</option><option value="screen">Screen</option><option value="glow">Glow</option></select></label>
+  <label><span>Opacity <output id="wispOpacityOut"></output></span>
+    <input type="range" id="wispOpacity" min="0" max="1" step="0.01" value="0.2"></label>
+</div>
+<div class="settings" id="settings">
+  <h2>Settings</h2>
+  <h3 style="margin-top:4px; padding-top:0; border-top:0">Camera</h3>
+  <label><span>Pan Orbit max range <output id="panRangeOut"></output></span>
+    <input type="range" id="panRange" min="1" max="12" step="0.5" value="5"></label>
+  <label><span>Ctrl-zoom depth <output id="dollyDepthOut"></output></span>
+    <input type="range" id="dollyDepth" min="0" max="1.5" step="0.05" value="1"></label>
+  <label><span>Pan Up max tilt <output id="craneTiltOut"></output></span>
+    <input type="range" id="craneTilt" min="5" max="60" step="1" value="14"></label>
+  <label title="Slow handheld sway that makes near and far layers shift against each other. Off when the system asks for reduced motion"><span>Shaky cam <output id="shakeOut"></output></span>
+    <input type="range" id="shake" min="0" max="300" step="5" value="100"></label>
+  <label title="The camera drifts a little after the walking character, so the layers parallax. 0 = off"><span>Follow character <output id="followOut"></output></span>
+    <input type="range" id="follow" min="0" max="300" step="5" value="100"></label>
+  <h3>Parallax</h3>
+  <label title="How much near and far layers slide against each other on sideways camera moves (shaky cam, orbit, follow, Pan Orbit). 0 = every layer moves like the rooftop. Fine-tune single layers on the Behind the Scenes cards"><span>Parallax X <output id="parallaxXOut"></output></span>
+    <input type="range" id="parallaxX" min="0" max="300" step="5" value="100"></label>
+  <label title="Same for up / down camera moves (Pan Up, From Below, follow, Pan Orbit)"><span>Parallax Y <output id="parallaxYOut"></output></span>
+    <input type="range" id="parallaxY" min="0" max="300" step="5" value="100"></label>
+  <h3>Row scroll</h3>
+  <label class="toggle" title="Street Fighter style: floor rows slide faster the closer they are"><input type="checkbox" id="rowScroll" checked> Row-scroll floor (Pan Orbit)</label>
+  <label title="Screen row where the floor's back edge is; rows above it don't shear"><span>Row-scroll floor start <output id="rowFloorTopOut"></output></span>
+    <input type="range" id="rowFloorTop" min="50" max="95" step="1" value="70"></label>
+  <label title="Pan weight of the bottom floor row. Rooftop is 0.35, foreground -0.30; lower = stronger shear"><span>Row-scroll bottom weight <output id="rowNearWeightOut"></output></span>
+    <input type="range" id="rowNearWeight" min="-1" max="0.35" step="0.05" value="0.1"></label>
+
+  <h3>Vertical row scroll</h3>
+  <label class="toggle" title="On Pan Up / Pan Down, floor rows move vertically by different amounts so the floor opens up as the camera rises"><input type="checkbox" id="vRowScroll" checked> Vertical row-scroll floor (Pan Up/Down, Pan Orbit)</label>
+  <label title="Screen row where the floor's back edge is; rows above it don't move"><span>Floor start <output id="vRowFloorTopOut"></output></span>
+    <input type="range" id="vRowFloorTop" min="50" max="95" step="1" value="70"></label>
+  <label title="How far the bottom floor row drops at full Pan Up or a full upward Pan Orbit drag, in % of screen height. Negative squashes the floor instead"><span>Bottom row drop <output id="vRowStrengthOut"></output></span>
+    <input type="range" id="vRowStrength" min="-20" max="30" step="0.5" value="-6"></label>
+
+  <h3 title="Lanterns and lamps on the roof">Lamp glows (midground)</h3>
+  <label class="color">Color <input type="color" id="midGlowColor" value="#fecfa9"></label>
+  <label class="color" title="Tint keeps the glow's hue over the blue night; Additive brightens towards white">Blend
+    <select id="midGlowBlend"><option value="normal">Tint</option><option value="additive" selected>Additive</option></select></label>
+  <label><span>Intensity <output id="midGlowGainOut"></output></span>
+    <input type="range" id="midGlowGain" min="0" max="2" step="0.05" value="0.9"></label>
+  <label><span>Size <output id="midGlowSizeOut"></output></span>
+    <input type="range" id="midGlowSize" min="0.3" max="3" step="0.05" value="0.8"></label>
+  <label title="0 = soft gradient, 1 = hard-edged flat bands"><span>Edge hardness <output id="midGlowHardnessOut"></output></span>
+    <input type="range" id="midGlowHardness" min="0" max="1" step="0.05" value="0.1"></label>
+  <label title="Number of flat brightness steps when edges are hard"><span>Bands <output id="midGlowBandsOut"></output></span>
+    <input type="range" id="midGlowBands" min="1" max="6" step="1" value="2"></label>
+  <label><span>Flicker amount <output id="midGlowFlickerOut"></output></span>
+    <input type="range" id="midGlowFlicker" min="0" max="2" step="0.05" value="0.25"></label>
+  <label><span>Flicker speed <output id="midGlowFlickerSpeedOut"></output></span>
+    <input type="range" id="midGlowFlickerSpeed" min="0" max="4" step="0.1" value="0.6"></label>
+  <label title="How much each glow grows and shrinks with its flicker"><span>Size pulse <output id="midGlowPulseOut"></output></span>
+    <input type="range" id="midGlowPulse" min="0" max="0.5" step="0.01" value="0.01"></label>
+
+  <h3 title="Lit windows of the near and far city">Window glows (background)</h3>
+  <label class="color">Color <input type="color" id="bgGlowColor" value="#ffa55c"></label>
+  <label class="color" title="Tint keeps the glow's hue over the blue night; Additive brightens towards white">Blend
+    <select id="bgGlowBlend"><option value="normal">Tint</option><option value="additive" selected>Additive</option></select></label>
+  <label><span>Intensity <output id="bgGlowGainOut"></output></span>
+    <input type="range" id="bgGlowGain" min="0" max="2" step="0.05" value="0.5"></label>
+  <label><span>Size <output id="bgGlowSizeOut"></output></span>
+    <input type="range" id="bgGlowSize" min="0.3" max="3" step="0.05" value="0.5"></label>
+  <label title="0 = soft gradient, 1 = hard-edged flat bands"><span>Edge hardness <output id="bgGlowHardnessOut"></output></span>
+    <input type="range" id="bgGlowHardness" min="0" max="1" step="0.05" value="0.3"></label>
+  <label title="Number of flat brightness steps when edges are hard"><span>Bands <output id="bgGlowBandsOut"></output></span>
+    <input type="range" id="bgGlowBands" min="1" max="6" step="1" value="4"></label>
+  <label><span>Flicker amount <output id="bgGlowFlickerOut"></output></span>
+    <input type="range" id="bgGlowFlicker" min="0" max="2" step="0.05" value="0.4"></label>
+  <label><span>Flicker speed <output id="bgGlowFlickerSpeedOut"></output></span>
+    <input type="range" id="bgGlowFlickerSpeed" min="0" max="4" step="0.1" value="1.1"></label>
+  <label title="How much each glow grows and shrinks with its flicker"><span>Size pulse <output id="bgGlowPulseOut"></output></span>
+    <input type="range" id="bgGlowPulse" min="0" max="0.5" step="0.01" value="0.01"></label>
+
+  <h3 title="The light of the stars in the nets; each keeps its own color, tinted by Color">Star glows (nets)</h3>
+  <label class="color">Color <input type="color" id="starGlowColor" value="#ffffff"></label>
+  <label class="color" title="Tint keeps the glow's hue over the blue night; Additive brightens towards white">Blend
+    <select id="starGlowBlend"><option value="normal">Tint</option><option value="additive" selected>Additive</option></select></label>
+  <label><span>Intensity <output id="starGlowGainOut"></output></span>
+    <input type="range" id="starGlowGain" min="0" max="2" step="0.05" value="0.8"></label>
+  <label><span>Size <output id="starGlowSizeOut"></output></span>
+    <input type="range" id="starGlowSize" min="0.3" max="3" step="0.05" value="1"></label>
+  <label title="0 = soft gradient, 1 = hard-edged flat bands"><span>Edge hardness <output id="starGlowHardnessOut"></output></span>
+    <input type="range" id="starGlowHardness" min="0" max="1" step="0.05" value="0.2"></label>
+  <label title="Number of flat brightness steps when edges are hard"><span>Bands <output id="starGlowBandsOut"></output></span>
+    <input type="range" id="starGlowBands" min="1" max="6" step="1" value="3"></label>
+  <label><span>Flicker amount <output id="starGlowFlickerOut"></output></span>
+    <input type="range" id="starGlowFlicker" min="0" max="2" step="0.05" value="0.2"></label>
+  <label><span>Flicker speed <output id="starGlowFlickerSpeedOut"></output></span>
+    <input type="range" id="starGlowFlickerSpeed" min="0" max="4" step="0.1" value="0.5"></label>
+  <label title="How much each glow grows and shrinks with its flicker"><span>Size pulse <output id="starGlowPulseOut"></output></span>
+    <input type="range" id="starGlowPulse" min="0" max="0.5" step="0.01" value="0.04"></label>
+
+  <h3 title="The painted ring around what to tap next, the full satchel's ripple and the jar's ring (COLLECT.hintRing)">Hint ring</h3>
+  <button id="btnHintRingShow" title="Show the ring around the next thing to tap (or the left net) for a few seconds">Show ring</button>
+  <label title="Soft bristles, or the star chart's ink brush (ragged edges, streaks, running dry)">Brush
+    <select id="hr_style"><option value="bristles" selected>Soft bristles</option><option value="ink">Ink brush</option></select></label>
+  <label class="color" title="The stroke's base color">Color <input type="color" id="hr_color" value="#ffe9c4"></label>
+  <label class="color" title="The hue drifts through this…">Color 2 <input type="color" id="hr_color2" value="#f6c9e6"></label>
+  <label class="color" title="…and this (also the faint light inside)">Color 3 <input type="color" id="hr_color3" value="#bcd2ff"></label>
+  <label title="0 = the base color all round, 1 = the hue drifts through color 2 and 3"><span>Hue shift <output id="hr_hueShiftOut"></output></span>
+    <input type="range" id="hr_hueShift" min="0" max="1" step="0.05" value="1"></label>
+  <label title="Stroke width (× the ring's radius)"><span>Thickness <output id="hr_widthOut"></output></span>
+    <input type="range" id="hr_width" min="0.02" max="0.3" step="0.005" value="0.1"></label>
+  <label title="How much of the circle the stroke covers"><span>Length <output id="hr_sweepOut"></output></span>
+    <input type="range" id="hr_sweep" min="0.4" max="1" step="0.01" value="0.94"></label>
+  <label title="Strength of the soft halo around the stroke"><span>Glow <output id="hr_glowOut"></output></span>
+    <input type="range" id="hr_glow" min="0" max="3" step="0.05" value="0.55"></label>
+  <label title="How far the halo spreads (× the stroke width)"><span>Glow size <output id="hr_glowSizeOut"></output></span>
+    <input type="range" id="hr_glowSize" min="0.2" max="3" step="0.05" value="0.9"></label>
+  <label title="The faint light inside the ring (color 3)"><span>Inner light <output id="hr_innerOut"></output></span>
+    <input type="range" id="hr_inner" min="0" max="0.5" step="0.01" value="0.12"></label>
+  <label title="Overall strength"><span>Strength <output id="hr_brightOut"></output></span>
+    <input type="range" id="hr_bright" min="0" max="1.5" step="0.05" value="0.7"></label>
+  <label title="Degrees per second the ring turns (so the hue drifts round)"><span>Spin <output id="hr_spinOut"></output></span>
+    <input type="range" id="hr_spin" min="0" max="30" step="0.5" value="4"></label>
+  <label title="Soft bristles: how many"><span>Bristles <output id="hr_bristlesOut"></output></span>
+    <input type="range" id="hr_bristles" min="1" max="20" step="1" value="9"></label>
+  <label title="Ink brush: bristle streaks along the stroke"><span>Ink streaks <output id="hr_grainOut"></output></span>
+    <input type="range" id="hr_grain" min="0" max="1" step="0.05" value="0.5"></label>
+  <label title="Ink brush: ragged edges"><span>Ink ragged <output id="hr_ragOut"></output></span>
+    <input type="range" id="hr_rag" min="0" max="1" step="0.05" value="0.6"></label>
+  <label title="Ink brush: how dry the paint runs towards the stroke's end"><span>Ink dry <output id="hr_dryOut"></output></span>
+    <input type="range" id="hr_dry" min="0" max="1" step="0.05" value="0.4"></label>
+
+  <h3 title="Short, soft, dark shadow where each prop touches the floor">Contact shadows</h3>
+  <label class="color">Color <input type="color" id="contactColor" value="#00010c"></label>
+  <label class="color" title="Multiply darkens the floor and keeps its colors (usual for shadows); Normal lays the color over it">Blend
+    <select id="contactBlend"><option value="multiply" selected>Multiply</option><option value="normal">Normal</option></select></label>
+  <label><span>Strength <output id="contactOpacityOut"></output></span>
+    <input type="range" id="contactOpacity" min="0" max="1" step="0.05" value="0.85"></label>
+  <label title="How far the shadow reaches out from the prop's base"><span>Size <output id="contactSizeOut"></output></span>
+    <input type="range" id="contactSize" min="8" max="200" step="4" value="60"></label>
+  <label><span>Softness <output id="contactSoftnessOut"></output></span>
+    <input type="range" id="contactSoftness" min="0" max="15" step="1" value="4"></label>
+
+  <h3 title="The longer shadow the props cast in the light">Cast shadows</h3>
+  <label class="color">Color <input type="color" id="castColor" value="#00010c"></label>
+  <label class="color" title="Multiply darkens the floor and keeps its colors (usual for shadows); Normal lays the color over it">Blend
+    <select id="castBlend"><option value="multiply" selected>Multiply</option><option value="normal">Normal</option></select></label>
+  <label><span>Strength <output id="castOpacityOut"></output></span>
+    <input type="range" id="castOpacity" min="0" max="1" step="0.05" value="0.55"></label>
+  <label title="Shadow length relative to the height that casts it"><span>Length <output id="castLengthOut"></output></span>
+    <input type="range" id="castLength" min="0" max="2" step="0.05" value="0.8"></label>
+  <label title="How much of each prop, from the floor up, casts a shadow"><span>Height <output id="castHeightOut"></output></span>
+    <input type="range" id="castHeight" min="100" max="1500" step="20" value="700"></label>
+  <label title="Merges small details into simple graphic shapes. 0 = detailed"><span>Clumping <output id="castClumpOut"></output></span>
+    <input type="range" id="castClump" min="0" max="20" step="1" value="8"></label>
+  <label title="How fast the shadow fades with distance from where it starts"><span>Falloff <output id="castFalloffOut"></output></span>
+    <input type="range" id="castFalloff" min="0" max="4" step="0.1" value="1.5"></label>
+  <label><span>Softness <output id="castSoftnessOut"></output></span>
+    <input type="range" id="castSoftness" min="0" max="15" step="1" value="6"></label>
+  <label title="0 = smooth gradient, 1 = hard flat bands"><span>Edge hardness <output id="castHardnessOut"></output></span>
+    <input type="range" id="castHardness" min="0" max="1" step="0.05" value="0.6"></label>
+
+  <h3 title="Short, soft, dark shadow where the telescope touches the floor">Telescope contact shadow</h3>
+  <label class="color">Color <input type="color" id="scopeContactColor" value="#00010c"></label>
+  <label class="color" title="Multiply darkens the floor and keeps its colors (usual for shadows); Normal lays the color over it">Blend
+    <select id="scopeContactBlend"><option value="multiply" selected>Multiply</option><option value="normal">Normal</option></select></label>
+  <label><span>Strength <output id="scopeContactOpacityOut"></output></span>
+    <input type="range" id="scopeContactOpacity" min="0" max="1" step="0.05" value="0.85"></label>
+  <label title="How far the shadow reaches out from the prop's base"><span>Size <output id="scopeContactSizeOut"></output></span>
+    <input type="range" id="scopeContactSize" min="8" max="200" step="4" value="60"></label>
+  <label><span>Softness <output id="scopeContactSoftnessOut"></output></span>
+    <input type="range" id="scopeContactSoftness" min="0" max="15" step="1" value="4"></label>
+
+  <h3 title="The longer shadow the telescope casts in the light">Telescope cast shadow</h3>
+  <label class="color">Color <input type="color" id="scopeCastColor" value="#00010c"></label>
+  <label class="color" title="Multiply darkens the floor and keeps its colors (usual for shadows); Normal lays the color over it">Blend
+    <select id="scopeCastBlend"><option value="multiply" selected>Multiply</option><option value="normal">Normal</option></select></label>
+  <label><span>Strength <output id="scopeCastOpacityOut"></output></span>
+    <input type="range" id="scopeCastOpacity" min="0" max="1" step="0.05" value="0.55"></label>
+  <label title="Shadow length relative to the height that casts it"><span>Length <output id="scopeCastLengthOut"></output></span>
+    <input type="range" id="scopeCastLength" min="0" max="2" step="0.05" value="0.8"></label>
+  <label title="How much of each prop, from the floor up, casts a shadow"><span>Height <output id="scopeCastHeightOut"></output></span>
+    <input type="range" id="scopeCastHeight" min="100" max="1500" step="20" value="700"></label>
+  <label title="Merges small details into simple graphic shapes. 0 = detailed"><span>Clumping <output id="scopeCastClumpOut"></output></span>
+    <input type="range" id="scopeCastClump" min="0" max="20" step="1" value="3"></label>
+  <label title="How fast the shadow fades with distance from where it starts"><span>Falloff <output id="scopeCastFalloffOut"></output></span>
+    <input type="range" id="scopeCastFalloff" min="0" max="4" step="0.1" value="1.2"></label>
+  <label><span>Softness <output id="scopeCastSoftnessOut"></output></span>
+    <input type="range" id="scopeCastSoftness" min="0" max="15" step="1" value="4"></label>
+  <label title="0 = smooth gradient, 1 = hard flat bands"><span>Edge hardness <output id="scopeCastHardnessOut"></output></span>
+    <input type="range" id="scopeCastHardness" min="0" max="1" step="0.05" value="0.6"></label>
+
+  <h3 title="Soft blob shadow under the character's feet; stays flat on the floor when the character leans">Character shadow</h3>
+  <label class="color">Color <input type="color" id="charShadowColor" value="#000000"></label>
+  <label><span>Strength <output id="charShadowOpacityOut"></output></span>
+    <input type="range" id="charShadowOpacity" min="0" max="1" step="0.05" value="0.9"></label>
+  <label title="× the character's width"><span>Width <output id="charShadowWidthOut"></output></span>
+    <input type="range" id="charShadowWidth" min="0.2" max="2.5" step="0.05" value="1"></label>
+  <label title="× the character's width: low = flatter on the floor"><span>Height <output id="charShadowHeightOut"></output></span>
+    <input type="range" id="charShadowHeight" min="0.04" max="1" step="0.01" value="0.24"></label>
+  <label title="Shift sideways, × the character's width"><span>Offset X <output id="charShadowOffsetXOut"></output></span>
+    <input type="range" id="charShadowOffsetX" min="-1" max="1" step="0.01" value="0"></label>
+  <label title="Shift up (+) or down (−), × the character's width"><span>Offset Y <output id="charShadowOffsetYOut"></output></span>
+    <input type="range" id="charShadowOffsetY" min="-0.3" max="0.3" step="0.005" value="0"></label>
+  <label title="0 = hard-edged disc, 1 = fades out from the very middle"><span>Softness <output id="charShadowSoftnessOut"></output></span>
+    <input type="range" id="charShadowSoftness" min="0" max="1" step="0.05" value="1"></label>
+
+  <h3 title="The dark eyepiece vignette while looking through the telescope">Telescope view</h3>
+  <label class="toggle" title="Off: no dark eyepiece ring, no round lens while searching and no extra search zoom"><input type="checkbox" id="vignetteOn" checked> Eyepiece vignette</label>
+  <label><span>Vignette intensity <output id="vignetteStrengthOut"></output></span>
+    <input type="range" id="vignetteStrength" min="0" max="2" step="0.05" value="1"></label>
+  <label title="0 = oval following the wide screen, 1 = a perfect circle"><span>Vignette roundness <output id="vignetteRoundnessOut"></output></span>
+    <input type="range" id="vignetteRoundness" min="0" max="1" step="0.05" value="0"></label>
+  <label title="Low = hard-edged ring, high = darkening starts close to the middle"><span>Vignette softness <output id="vignetteSoftnessOut"></output></span>
+    <input type="range" id="vignetteSoftness" min="0.05" max="1" step="0.01" value="0.48"></label>
+
+  <h3 title="Constellation chimes">Sound</h3>
+  <label><span>Chime volume <output id="chimeVolumeOut"></output></span>
+    <input type="range" id="chimeVolume" min="0" max="100" step="1" value="35"></label>
+  <label title="The extra high glitter when a tap lands in rhythm, relative to the chimes"><span>Rhythm sparkle sound <output id="shimmerVolumeOut"></output></span>
+    <input type="range" id="shimmerVolume" min="0" max="100" step="1" value="30"></label>
+  <label title="Soft background music in the chimes' key and tempo"><span>Music volume <output id="musicVolumeOut"></output></span>
+    <input type="range" id="musicVolume" min="0" max="100" step="1" value="30"></label>
+  <label title="Background music versions (js/music-tracks/); switch back to an earlier one any time"><span>Music track</span>
+    <select id="musicTrack"></select></label>
+
+  <h3>Night sky</h3>
+  <label class="toggle" title="Twinkling star sprites (the stars painted into the sky image stay)"><input type="checkbox" id="starsOn" checked> Stars</label>
+  <label class="toggle"><input type="checkbox" id="shootingOn" checked> Shooting stars</label>
+
+  <h3>Fog</h3>
+  <label class="color">Color <input type="color" id="fogColor" value="#5b78c9"></label>
+  <label><span>Opacity <output id="fogOpacityOut"></output></span>
+    <input type="range" id="fogOpacity" min="0" max="1.5" step="0.05" value="0.6"></label>
+  <label title="0 = soft wisps, 1 = hard-edged two-tone shapes"><span>Edge hardness <output id="fogHardnessOut"></output></span>
+    <input type="range" id="fogHardness" min="0" max="1" step="0.05" value="0.6"></label>
+  <label><span>Drift speed <output id="fogSpeedOut"></output></span>
+    <input type="range" id="fogSpeed" min="0" max="0.15" step="0.005" value="0.03"></label>
+
+  <h3 title="Multiplies the near and far city art (SKY_LOOK.cityTint in config.js); white = the art as painted, a gray only darkens it">City tint</h3>
+  <label class="color">Color <input type="color" id="cityTint" value="#b9c3ec"></label>
+
+  <h3 title="Soft orange light rising from the streets below (CITY_GLOW in config.js)">City glow</h3>
+  <label class="color">Color <input type="color" id="cityGlowColor" value="#c8693c"></label>
+  <label title="Between the far and the near city, seen behind the near city's roofs"><span>Behind the city <output id="cityGlowFarOut"></output></span>
+    <input type="range" id="cityGlowFar" min="0" max="0.6" step="0.01" value="0.13"></label>
+  <label title="Just behind the rooftop, seen between the props and at the sides"><span>Behind the roof <output id="cityGlowNearOut"></output></span>
+    <input type="range" id="cityGlowNear" min="0" max="0.6" step="0.01" value="0.25"></label>
+
+  <h3 title="Subtle, soft atmosphere (js/ambient.js); tuning in AMBIENT (config.js)">Ambient FX</h3>
+  <label class="toggle"><input type="checkbox" id="ambOn" checked> Ambient FX</label>
+  <label title="Slow steam curls from the chimneys of the near city"><span>Chimney steam <output id="amb_steamOut"></output></span>
+    <input type="range" id="amb_steam" min="0" max="200" step="5" value="100"></label>
+
+  <h3 title="Tiny white-hot bodies in a warm ember glow, darting about over the garden and the city (ambient.js, AMBIENT.fireflies)">Fireflies</h3>
+  <label title="Overall brightness (0 = off)"><span>Brightness <output id="amb_firefliesOut"></output></span>
+    <input type="range" id="amb_fireflies" min="0" max="200" step="5" value="100"></label>
+  <label class="color" title="Firefly color; each one varies its hue slightly around it">Color <input type="color" id="flyColor" value="#ff8a45"></label>
+  <label title="How many of the fireflies are out"><span>Amount <output id="flyDensityOut"></output></span>
+    <input type="range" id="flyDensity" min="0" max="100" step="5" value="100"></label>
+  <label title="Size of the whole firefly, glow included"><span>Size <output id="flySizeOut"></output></span>
+    <input type="range" id="flySize" min="25" max="200" step="5" value="100"></label>
+  <label title="Radius of the bright body, as a fraction of the glow (0 = glow only)"><span>Body size <output id="flyCoreOut"></output></span>
+    <input type="range" id="flyCore" min="0" max="0.12" step="0.005" value="0.04"></label>
+  <label title="Strength of the soft painted glow around the body"><span>Glow <output id="flyHaloOut"></output></span>
+    <input type="range" id="flyHalo" min="0" max="200" step="5" value="100"></label>
+  <label title="Strength of the warm orange glow right around the white body (0 = none)"><span>Ember glow <output id="flyRimAmtOut"></output></span>
+    <input type="range" id="flyRimAmt" min="0" max="300" step="5" value="100"></label>
+  <label title="How far the warm glow reaches around the body, as a multiple of the body's size"><span>Ember glow size <output id="flyRimOut"></output></span>
+    <input type="range" id="flyRim" min="1" max="8" step="0.1" value="2.6"></label>
+  <label title="Edge of the warm glow: 0 = crisp, 100 = a long soft fade"><span>Ember glow softness <output id="flyRimSoftOut"></output></span>
+    <input type="range" id="flyRimSoft" min="0" max="100" step="1" value="67"></label>
+  <label title="How much their warm light brightens the roof, the plants and the character around them (0 = none)"><span>Light on surroundings <output id="flyLightOut"></output></span>
+    <input type="range" id="flyLight" min="0" max="300" step="5" value="100"></label>
+  <label title="How fast they glow up and fade (100% = one cycle every 10–18 s)"><span>Blink speed <output id="flyBlinkOut"></output></span>
+    <input type="range" id="flyBlink" min="10" max="300" step="5" value="100"></label>
+  <label title="How bright they stay between glows (0 = fully dark)"><span>Rest glow <output id="flyRestOut"></output></span>
+    <input type="range" id="flyRest" min="0" max="100" step="5" value="10"></label>
+  <label title="How far they wander from their spot"><span>Wander distance <output id="flyWanderOut"></output></span>
+    <input type="range" id="flyWander" min="0" max="300" step="5" value="100"></label>
+  <label title="How fast they wander"><span>Wander speed <output id="flyWanderSpeedOut"></output></span>
+    <input type="range" id="flyWanderSpeed" min="0" max="300" step="5" value="100"></label>
+  <div class="readout" id="readout"></div>
+</div>
+<div class="bts-labels" id="btsLabels"></div>
+<div class="bts-panel" id="btsPanel">
+  <h2>Behind the scenes</h2>
+  <p>The scene is a stack of flat layers, like sheets of glass: painted layers (the rooftop props each on their own) plus animated sheets for the mist and the warm street glow. Window and lamp glows, cast shadows, steam, fireflies, motes, the moon's halo and twinkling stars are effects drawn on or between their layers.</p>
+  <p>When the camera moves, near sheets slide further than distant ones. Your eyes read that difference in speed as depth: this is the <b>parallax effect</b>. The % on each card is how fast it slides compared to the foreground.</p>
+  <p>Looking up into the sky or swinging the telescope is a turn of the camera, not a move: there every sheet turns together, without parallax, just as a real view does.</p>
+  <p>Drag to rotate the view · scroll to move closer.</p>
+  <p class="bts-tune">Each card's <b>Parallax</b> slider fine-tunes how fast that layer slides. Save keeps them in this browser.</p>
+</div>
+<div class="hint" id="hint">Orbit / Pan Orbit: drag to look around · Scroll: zoom · Ctrl+scroll: dolly zoom</div>
+<div class="controls">
+  <button id="btnOrbit" aria-pressed="false" title="Toggle 3D orbit (O)">Orbit</button>
+  <button id="btnPanOrbit" aria-pressed="false" title="Toggle 2D parallax orbit (P)">Pan Orbit</button>
+  <button id="btnRise" title="Camera rises from below the rooftop (F)">From Below</button>
+  <button id="btnUp" title="Pan up to the sky (↑)">Pan Up</button>
+  <button id="btnDown" title="Pan down to the rooftop (↓)" disabled>Pan Down</button>
+  <button id="btnBts" aria-pressed="false" title="Show how the scene is layered (B)">Behind the Scenes</button>
+  <button id="btnReset" title="Reset camera (R)">Reset</button>
+  <button id="btnFillNets" title="Skip the stargazing: the first recipe's stars (Orange star lily) appear in the nets, ready to collect and grow">Fill nets ✦</button>
+  <button id="btnFirstPlant"title="Skip the gameplay: the first plant (Orange star lily) appears on the roof, waiting to be planted">First plant ✦</button>
+</div>
+<!-- Start screen (startScreen.js): also the loading screen. The art fades in first, the swirl spins where
+     the Play button will be while the game loads, then Play appears. Its click also unlocks the sound. -->
+<div class="startscreen" id="startscreen" role="dialog" aria-label="Starseed Garden">
+  <div class="start-layer" data-depth="0"><img src="Assets/startscreen/startscreen_sky.webp" alt=""></div>
+  <div class="start-layer" data-depth="0.35"><img src="Assets/startscreen/startscreen_city.webp" alt=""></div>
+  <div class="start-layer logo" data-depth="0.15"><img src="Assets/startscreen/startscreen_logo.webp" alt="Starseed Garden">
+    <button class="start-play" id="btnPlay" disabled><img src="Assets/startscreen/button_play.webp" alt="Play"></button></div>
+  <div class="start-layer" data-depth="1"><img src="Assets/startscreen/startscreen_flowers.webp" alt=""></div>
+  <div class="start-wait" role="status" aria-label="Loading">
+    <div class="loader">
+      <svg class="swirl" viewBox="0 0 120 120" aria-hidden="true">
+        <defs><linearGradient id="swirlGold" x1="1" y1="0.4" x2="0" y2="0.8">
+          <stop offset="0" stop-color="#ffc94a" stop-opacity="0"/><stop offset="1" stop-color="#ffc94a"/></linearGradient></defs>
+        <circle cx="60" cy="60" r="56" fill="none" stroke="url(#swirlGold)" stroke-width="4" stroke-linecap="round" stroke-dasharray="150 202"/>
+        <circle cx="10.1" cy="85.4" r="3.5" fill="#fff3c4"/>
+      </svg>
+      <svg class="swirl inner" viewBox="0 0 120 120" aria-hidden="true">
+        <defs><linearGradient id="swirlCyan" x1="0.36" y1="0.86" x2="1" y2="0.5">
+          <stop offset="0" stop-color="#5ff3ff" stop-opacity="0"/><stop offset="1" stop-color="#5ff3ff"/></linearGradient></defs>
+        <circle cx="60" cy="60" r="46" fill="none" stroke="url(#swirlCyan)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="90 199"/>
+      </svg>
+      <img class="star" src="Assets/ui/loader_star.webp" alt="" aria-hidden="true">
+    </div>
+  </div>
+</div>
+</div><!-- .stage -->
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js" } }
+</script>
+<!-- Load order: start screen + background music first (tiny, no three.js), so they show / play while the
+     big assets.js loads (its parsing blocks the page for a few seconds; the music keeps playing on the audio
+     thread); then the game. main.js imports the same modules (one shared instance each). -->
+<script type="module">
+  import { artShown } from './js/startScreen.js';
+  import './js/music.js';
+  artShown.then(() => {
+    const art = document.createElement('script');
+    art.src = 'assets.js';
+    art.onload = () => import('./js/main.js');
+    document.body.append(art);
+  });
+</script>
+</body>
+</html>

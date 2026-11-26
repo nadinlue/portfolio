@@ -1,0 +1,482 @@
+:root {
+  --panel: rgba(8, 16, 40, 0.62);
+  --panel-border: rgba(140, 170, 255, 0.18);
+  --text: #e9eefc;
+  --muted: #9fb0d8;
+  --accent: #ffb54a;
+  --accent-ink: #2a1600;
+  /* In-game text font (hints, names, cards). Storybook serif to match the title art; SOFT rounds the serifs. */
+  --ui-font: 'Fraunces', Georgia, serif;
+  --ui-font-soft: 100;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #000; color: var(--text);
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-variation-settings: 'SOFT' var(--ui-font-soft);
+  -webkit-tap-highlight-color: transparent; }   /* no browser box over tapped things (phones); the game has its own highlights */
+/* The game always shows at 16:9, centered, with black bars filling the rest of the window.
+   resize() sets the stage size and --stage-w / --stage-h. The transform makes the stage the
+   containing block for the position: fixed UI below, so the UI stays inside the 16:9 area.
+   --stage-x / --stage-y (whole pixels, also set by resize()) centre it: centring with translate(-50%, -50%) put it
+   on a half pixel whenever the black bars were odd, and the greenhouse's half-covered edge column then let the
+   rooftop picture underneath flicker through. */
+.stage { position: fixed; left: var(--stage-x, 0px); top: var(--stage-y, 0px); width: var(--stage-w, 100vw); height: var(--stage-h, 100vh);
+  transform: translate(0, 0); overflow: hidden; background: #021033; }
+canvas { display: block; touch-action: none; }
+/* The game picture stays under everything in the stage, also while it has a CSS filter (the search's focus blur,
+   scopeSearch.js), which would otherwise lift it above the vignette and the UI. */
+.stage > canvas { position: relative; z-index: -1; }
+body.orbit canvas { cursor: grab; }
+body.orbit.dragging canvas { cursor: grabbing; }
+
+.title { position: fixed; top: 16px; left: 16px; padding: 10px 14px; border-radius: 10px;
+  background: var(--panel); border: 1px solid var(--panel-border); backdrop-filter: blur(6px); }
+.title h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: 0.02em; }
+.title p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+
+.controls { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+  display: flex; gap: 8px; padding: 8px; border-radius: 14px; max-width: calc(var(--stage-w, 100vw) - 32px);
+  background: var(--panel); border: 1px solid var(--panel-border); backdrop-filter: blur(6px); }
+.controls button { appearance: none; border: 1px solid var(--panel-border); border-radius: 9px;
+  padding: 9px 16px; min-width: 92px; background: rgba(255,255,255,0.06); color: var(--text);
+  font: inherit; font-weight: 600; cursor: pointer; transition: background .15s, color .15s, opacity .15s; }
+.controls button:hover:not(:disabled) { background: rgba(255,255,255,0.14); }
+.controls button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.controls button:disabled { opacity: 0.4; cursor: default; }
+.controls button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.hint { position: fixed; left: 50%; bottom: 82px; transform: translateX(-50%); color: var(--muted);
+  font-size: 12px; text-align: center; padding: 0 16px; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+
+.menu-btn { position: fixed; top: 16px; right: 16px; appearance: none; border: 1px solid var(--panel-border);
+  border-radius: 9px; padding: 7px 14px; background: var(--panel); color: var(--text); font: inherit; font-weight: 600;
+  cursor: pointer; backdrop-filter: blur(6px); }
+.menu-btn:hover { background: rgba(40, 56, 100, 0.8); }
+.menu-btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.menu-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sound-btns { position: fixed; top: 16px; right: 92px; display: flex; gap: 8px; }   /* ✦ Chimes, ♪ Music, left of Dev */
+.sound-btns .menu-btn { position: static; }
+.sound-btns .menu-btn[hidden] { display: none; }   /* Fullscreen, where the browser can't do it (iPhone Safari) */
+.sky-btn { top: 56px; }   /* under Dev; the Settings panels start below it */
+body.dev .sky-settings { right: 272px; }   /* beside the Settings panel when both are open */
+body:not(.dev-sky) .sky-settings { opacity: 0; pointer-events: none; }
+.chart-btn { top: 96px; }   /* under Dev sky */
+.chart-settings { left: 16px; right: auto; }   /* Dev chart: on the left, clear of the other panels */
+body:not(.dev-chart) .chart-settings { opacity: 0; pointer-events: none; }
+.soundpanel-btn { top: 136px; }   /* under Dev chart */
+.roof-btn { top: 176px; }   /* under Dev sound */
+body:not(.in-sky) .roof-btn { display: none; }   /* only up in the sky (modes.js) */
+.skip-btn { top: 216px; }   /* under Dev roof */
+body:not(.can-skip) .skip-btn { display: none; }   /* only while a constellation waits to be played (constellation.js) */
+.settings.sound-settings { top: 180px; max-height: calc(var(--stage-h, 100vh) - 280px); }   /* Dev sound: below its button, on the right */
+body.dev .sound-settings { right: 272px; }   /* beside the Settings panel when both are open */
+body:not(.dev-sound) .sound-settings { opacity: 0; pointer-events: none; }
+.music-btn[aria-pressed="true"] { border-color: var(--panel-border); color: var(--text); text-decoration: line-through; }   /* pressed = muted */
+body:not(.dev):not(.dev-sky) .menu-btn { opacity: 0.45; }
+body:not(.dev) .menu-btn:hover { opacity: 1; }
+
+/* Mobile menu: on touch screens the menu buttons (sound, Dev, Dev sky, Dev chart) are hidden behind a small
+   + button in the top left corner; tapping it shows them as a column below it (and turns it into −). ui.js toggles
+   body.menu-open. On desktop the wrapper does nothing and the toggle stays hidden. */
+.top-menu { display: contents; }
+.menu-toggle { display: none; }
+@media (pointer: coarse) {
+  .menu-toggle { display: block; position: fixed; top: 12px; left: 12px; width: 36px; height: 36px;
+    padding: 0; appearance: none; border: 1px solid var(--panel-border); border-radius: 50%; background: var(--panel);
+    color: var(--text); font: 600 22px/1 system-ui, sans-serif; cursor: pointer; backdrop-filter: blur(6px);
+    -webkit-tap-highlight-color: transparent; }
+  body.menu-open .menu-toggle { border-color: var(--accent); color: var(--accent); }
+  .top-menu { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; position: fixed; top: 56px; left: 12px;
+    transition: opacity .25s, transform .25s; }
+  body:not(.menu-open) .top-menu { opacity: 0; transform: translateY(-6px); pointer-events: none; }
+  .top-menu .menu-btn, .top-menu .sound-btns { position: static; }
+  .top-menu .menu-btn { padding: 6px 12px; font-size: 13px; }
+  .top-menu .sound-btns { flex-direction: column; align-items: flex-start; gap: 6px; }
+  body:not(.dev):not(.dev-sky) .top-menu .menu-btn { opacity: 1; }
+  .title { left: 60px; top: 12px; }   /* clear of the + button */
+  .chart-settings { left: 140px; }   /* clear of the open menu column */
+}
+/* Mobile build (build_mobile.py sets html.build-mobile): the same fold-away menu on every screen, behind a ☰ button. */
+html.build-mobile .menu-toggle { display: block; position: fixed; top: 12px; left: 12px; width: 40px; height: 40px;
+  padding: 0; appearance: none; border: 1px solid var(--panel-border); border-radius: 50%; background: var(--panel);
+  color: var(--text); font: 600 20px/1 system-ui, sans-serif; cursor: pointer; backdrop-filter: blur(6px);
+  -webkit-tap-highlight-color: transparent; }
+html.build-mobile body.menu-open .menu-toggle { border-color: var(--accent); color: var(--accent); }
+html.build-mobile .top-menu { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; position: fixed; top: 60px; left: 12px;
+  transition: opacity .25s, transform .25s; }
+html.build-mobile body:not(.menu-open) .top-menu { opacity: 0; transform: translateY(-6px); pointer-events: none; }
+html.build-mobile .top-menu .menu-btn, html.build-mobile .top-menu .sound-btns { position: static; }
+html.build-mobile .top-menu .menu-btn { padding: 6px 12px; font-size: 13px; }
+html.build-mobile .top-menu .sound-btns { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+html.build-mobile body:not(.dev):not(.dev-sky) .top-menu .menu-btn { opacity: 1; }
+html.build-mobile .title { left: 64px; top: 12px; }
+html.build-mobile .chart-settings { left: 140px; }
+
+/* Phones held upright: a full-window hint to turn the phone sideways, with a phone outline that tips over. */
+.rotate-hint { display: none; }
+@media (pointer: coarse) and (orientation: portrait) and (max-width: 600px) {
+  .rotate-hint { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+    position: fixed; inset: 0; z-index: 100; background: #021033; color: var(--text); text-align: center; padding: 24px;
+    font: 600 18px/1.4 var(--ui-font); }
+  .rotate-hint p { margin: 0; }
+  .rotate-phone { width: 44px; height: 76px; border: 3px solid var(--accent); border-radius: 9px;
+    animation: rotate-phone 2.8s ease-in-out infinite; }
+}
+@keyframes rotate-phone { 0%, 25% { transform: rotate(0); } 55%, 85% { transform: rotate(-90deg); } 100% { transform: rotate(0); } }
+@media (prefers-reduced-motion: reduce) { .rotate-phone { animation: none; transform: rotate(-90deg); } }
+
+/* Dev UI (title, camera buttons, hint, settings) is hidden unless the Dev button is on. */
+.title, .controls { transition: opacity .4s; }
+body:not(.dev) .title, body:not(.dev) .controls, body:not(.dev) .hint, body:not(.dev) #settings {
+  opacity: 0; pointer-events: none; }
+
+/* Game UI */
+/* Greenhouse interior picture: fades in over the game view (and blocks clicks on it) while inside. */
+.interior { position: fixed; inset: 0; background: #000 center / cover no-repeat; opacity: 0; pointer-events: none;
+  transition: opacity 0.6s ease; container-type: size; overflow: clip; }   /* size container: .interior-art measures the letterboxed stage, not the window.
+  clip: the layers' bleed and the sky above reach past the stage, which must not make it scrollable */
+.interior.show { opacity: 1; pointer-events: auto; }
+/* While the greenhouse is hidden nothing inside it may catch taps (tap areas set pointer-events: auto, which would
+   otherwise reach through the invisible interior and cover the rooftop, e.g. the telescope). */
+.interior:not(.show) * { pointer-events: none !important; }
+.interior-layer { position: absolute; inset: 0; background: center / cover no-repeat; will-change: transform; }
+/* Greenhouse lamp light (glow + table pool): sheets blended additively, like the rooftop lantern glows. */
+.interior-lights { mix-blend-mode: plus-lighter; pointer-events: none; }
+.interior-light { position: absolute; transform: translate(-50%, -50%); }
+/* A box the size of the art as `cover` fits it, so things placed in it in % of the art match the pictures. */
+.interior-art { position: absolute; left: 50%; top: 50%; width: max(100cqw, 177.78cqh); height: max(56.25cqw, 100cqh);
+  transform: translate(-50%, -50%); }
+/* Star storage jars (jars.js) */
+.interior-top { pointer-events: none; }
+.jar-hit { position: absolute; pointer-events: auto; cursor: pointer; }
+.jar-stars { position: absolute; }
+.jar-star, .jar-fly { position: absolute; background: center / contain no-repeat; transform: translate(-50%, -50%); }
+.jar-glow { position: absolute; transform: translate(-50%, -50%); }
+.jar-shine { position: absolute; inset: 0; background: center / 100% 100% no-repeat; }   /* glasses art, clipped to one jar */
+/* hint ring on a jar (jars.js), the roof's painted hint ring (collect.js brushRingCanvas); its image is set by jars.js.
+   The ring sits at 0.36 of the image, so the image overhangs the box to keep the ring on the box's edge. */
+.jar-ring { position: absolute; aspect-ratio: 1; height: auto !important; pointer-events: none; opacity: 0; mix-blend-mode: plus-lighter; }
+.jar-ring::before { content: ''; position: absolute; inset: -19.4%; background: var(--img) center / 100% 100% no-repeat;
+  transform: rotate(var(--spin, 0deg)); }
+/* Planting (planting.js): the plant canvases, the circles above the pot, the dragged star */
+.plant-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.plant-slot { position: absolute; transform: translate(-50%, -50%); border-radius: 50%; opacity: 0; pointer-events: none; }
+.plant-slot::before { content: ''; position: absolute; inset: -30%; border-radius: 50%; opacity: var(--glow, 0); mix-blend-mode: plus-lighter;
+  background: radial-gradient(circle closest-side, color-mix(in srgb, var(--c) 70%, transparent) 0%, color-mix(in srgb, var(--c) 22%, transparent) 40%, transparent 100%); }
+.plant-slot::after { content: ''; position: absolute; inset: 14%; border-radius: 50%; opacity: var(--ring, 1);
+  border: calc(var(--stage-h, 100vh) * 0.0035) dashed rgba(255, 246, 225, 0.95);
+  box-shadow: 0 0 calc(var(--stage-h, 100vh) * 0.012) rgba(255, 226, 160, 0.45), inset 0 0 calc(var(--stage-h, 100vh) * 0.02) rgba(255, 226, 160, 0.25); }
+.plant-slot-star { position: absolute; inset: 22%; background: center / contain no-repeat; cursor: grab; touch-action: none; pointer-events: none; }
+.plant-drag { pointer-events: none; filter: drop-shadow(0 0 10px rgba(255, 244, 210, 0.7)); }
+body.plant-dragging, body.plant-dragging * { cursor: grabbing !important; }
+.jar-hit { touch-action: none; }
+.plant-pot-hit { position: absolute; pointer-events: auto; }
+/* above the painted greenhouse while the camera pans up (placeholders): sky gradient, twinkling stars, glass roof */
+.plant-above { position: absolute; overflow: visible; pointer-events: none; }
+.plant-sky-star { opacity: var(--a); animation: plant-twinkle ease-in-out infinite alternate; }
+@keyframes plant-twinkle { from { opacity: calc(var(--a) * 0.4); } to { opacity: var(--a); } }
+/* Grow ✦ sits above the filled circles (planting.js places it on the pot's sheet; left / top = under its bottom
+   centre) and blooms in with a little overshoot, then glows softly. */
+.return-btn.grow-btn { position: absolute; bottom: auto; transform: translate(-50%, -100%) scale(0.6);
+  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 1.5, 0.4, 1), background 0.2s; }
+.return-btn.grow-btn.show { transform: translate(-50%, -100%); }
+/* The pill of the other buttons (.return-btn: dark glass, thin golden rim) with a twinkling star at each end, a warm
+   glow breathing around it; brighter under the pointer. */
+.return-btn.grow-btn { display: flex; align-items: center; gap: 0.45em; padding: 0.6em 1.3em; }
+.return-btn.grow-btn::after { content: ''; position: absolute; inset: -35% -12%; z-index: -1; border-radius: 50%; opacity: 0.35; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 196, 110, 0.45), rgba(255, 196, 110, 0)); }
+.return-btn.grow-btn.show::after { animation: grow-glow 2.8s ease-in-out 0.6s infinite; }
+.return-btn.grow-btn:hover::after { opacity: 0.7; }
+.grow-star { display: inline-block; font-size: 0.9em; animation: rn-twinkle 3.6s ease-in-out infinite; }
+.grow-star:last-child { animation-delay: 1.2s; }
+@keyframes grow-glow { 50% { opacity: 0.65; transform: scale(1.08); } }
+/* Telescope vignette: above the game picture, below all UI. Look and opacity set by vignette.js. */
+.vignette { position: fixed; inset: 0; pointer-events: none; opacity: 0;
+}   /* gradient set by vignette.js */
+/* Sized with the stage (a big, friendly touch target on phones), never smaller than 17px text. */
+.return-btn { position: fixed; left: 50%; bottom: max(24px, calc(var(--stage-h, 100vh) * 0.035)); transform: translateX(-50%);
+  padding: 0.6em 1.5em; border-radius: 999px; border: 1.5px solid rgba(255, 231, 168, 0.5);
+  background: rgba(8, 16, 40, 0.6); color: #fff3d6; font: 500 max(18px, calc(var(--stage-h, 100vh) * 0.03))/1 var(--ui-font);
+  letter-spacing: 0.05em; cursor: pointer; backdrop-filter: blur(4px);
+  box-shadow: 0 0 calc(var(--stage-h, 100vh) * 0.02) rgba(255, 200, 120, 0.25);
+  opacity: 0; pointer-events: none; transition: opacity 0.8s ease, background 0.2s; }
+.return-btn.show { opacity: 1; pointer-events: auto; }
+.return-btn.show.held { opacity: 0; pointer-events: none; }   /* away while something can't be interrupted (the plant growing) */
+.return-btn:hover { background: rgba(30, 44, 90, 0.6); }
+/* Leave greenhouse: a quiet round icon in the lower left corner, out of the picture's way; brighter under the pointer. */
+.return-btn.corner-btn { left: max(16px, calc(var(--stage-h, 100vh) * 0.03)); bottom: max(16px, calc(var(--stage-h, 100vh) * 0.03)); transform: none;
+  width: max(44px, calc(var(--stage-h, 100vh) * 0.075)); aspect-ratio: 1; padding: 0; display: grid; place-items: center;
+  border: 1px solid rgba(255, 231, 168, 0.18); background: rgba(8, 16, 40, 0.35); box-shadow: none; color: rgba(255, 238, 205, 0.7);
+  transition: opacity 0.8s ease, background 0.2s, color 0.2s, border-color 0.2s; }
+.return-btn.corner-btn svg { width: 64%; height: 64%; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+.return-btn.corner-btn svg .fill { fill: currentColor; stroke: none; }
+.return-btn.corner-btn:hover { background: rgba(20, 30, 70, 0.55); color: #fff3d6; border-color: rgba(255, 231, 168, 0.45); }
+.return-btn:focus-visible { outline: 2px solid #fff3c4; outline-offset: 3px; }
+body.dev .return-btn { bottom: 120px; }   /* clear of the dev camera buttons */
+
+/* Constellation name, shown under it when it's complete (constellation.js places it). */
+.constellation-name { position: absolute; transform: translateX(-50%); pointer-events: none; text-align: center; white-space: nowrap;
+  color: var(--name-color, #ffe2a0); font: 500 22px/1 var(--ui-font); letter-spacing: 0.3em; text-transform: uppercase;
+  text-shadow: 0 0 10px var(--name-color, #ffc86e); opacity: 0;
+  transition: opacity 0.6s ease; }
+.constellation-name.show { opacity: 0.9; }
+
+/* Jar count, over a jar on hover or tap (collect.js places it). */
+.jar-label { position: absolute; transform: translate(-50%, -100%); pointer-events: none; white-space: nowrap;
+  padding: 0.3em 0.75em; border-radius: 999px; background: rgba(8, 16, 40, 0.65); color: var(--name-color, #ffe2a0);
+  font: 500 max(14px, calc(var(--stage-h, 100vh) * 0.024))/1 var(--ui-font); letter-spacing: 0.08em; opacity: 0; transition: opacity 0.3s ease; }
+.jar-label.show { opacity: 1; }
+.constellation-name small { display: block; margin-top: 10px; font-size: 15px; letter-spacing: 0.25em; text-transform: none; opacity: 1; }
+/* The name swooshes out of its centre: each letter starts at the middle (--o letters away), small and
+   blurred, and slides out to its place, middle letters first (--d). Then a musical wave runs outwards
+   from the centre: each letter lifts and brightens in turn. The element name rises in underneath at the same time. */
+.cn-ch { display: inline-block; opacity: 0; }
+.constellation-name.show .cn-ch {
+  animation: cn-in 0.95s cubic-bezier(0.2, 0.85, 0.25, 1) calc(var(--d) * 0.06s) forwards,
+             cn-wave 1.1s ease-in-out calc(0.75s + var(--d) * 0.09s); }
+.constellation-name small { opacity: 0; }
+.constellation-name.show small { animation: cn-sub 0.95s cubic-bezier(0.2, 0.85, 0.25, 1) forwards; }
+@keyframes cn-in { from { opacity: 0; transform: translateX(calc(var(--o) * 0.9em)) scale(0.5); filter: blur(6px); }
+                   55% { opacity: 1; }
+                   to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes cn-wave { 0%, 100% { transform: none; }
+                     40% { transform: translateY(-6px) scale(1.08); color: #fffaf0;
+                           text-shadow: 0 0 12px #fff6dc, 0 0 26px var(--name-color, #ffc86e); } }
+@keyframes cn-sub { from { opacity: 0; transform: translateY(6px); filter: blur(3px); } to { opacity: 1; transform: none; filter: blur(0); } }
+
+/* "in rhythm with the sky" (constellation.js): breathes in letter by letter, out of a soft blur, a wave of light
+   runs through the letters, the two stars bloom last, then the whole note glows softly until it drifts away. */
+.constellation-name.rhythm-note { font-size: clamp(24px, 3.4vw, 44px); letter-spacing: 0.18em; text-transform: none; opacity: 1; transition: none; }
+.rhythm-note::before { content: ''; position: absolute; inset: -0.9em -1.8em; z-index: -1; border-radius: 50%; opacity: 0;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--name-color, #ffc86e) 32%, transparent), transparent); }
+.rn-ch, .rn-star { display: inline-block; opacity: 0; }
+.rn-star { margin: 0 0.6em; font-size: 1.1em; letter-spacing: 0; }
+.rhythm-note.show::before { animation: rn-halo-in 1.1s ease-out forwards, rn-breathe 5s ease-in-out 1.1s infinite; }
+.rhythm-note.show .rn-ch {
+  animation: rn-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i) * 0.022s) forwards,
+             rn-wave 1.3s ease-in-out calc(0.45s + var(--i) * 0.035s) both; }
+.rhythm-note.show .rn-star {
+  animation: rn-star-in 0.9s cubic-bezier(0.2, 1.3, 0.4, 1) calc(0.15s + var(--n) * 0.022s) forwards,
+             rn-twinkle 3.6s ease-in-out calc(1.1s + var(--n) * 0.022s) infinite; }
+.rhythm-note.show .rn-star:last-child { animation-delay: calc(0.25s + var(--n) * 0.022s), calc(1.4s + var(--n) * 0.022s); }
+.rhythm-note.leaving::before { opacity: 0.8; animation: rn-fade-out 0.8s ease-in forwards; }
+/* both: each letter holds its shown state through its stagger delay (without it they blinked out, then faded again) */
+.rhythm-note.leaving .rn-ch { animation: rn-out 0.7s ease-in calc(var(--i) * 0.012s) both; }
+.rhythm-note.leaving .rn-star { animation: rn-fade-out 0.6s ease-in forwards; }
+@keyframes rn-in { from { opacity: 0; filter: blur(7px); transform: translateY(9px) scale(0.92); }
+                   to { opacity: 1; filter: blur(0); transform: none; } }
+@keyframes rn-wave { 0%, 100% { color: var(--name-color, #ffe2a0); text-shadow: 0 0 10px var(--name-color, #ffc86e); }
+                     40% { color: #fffaf0; text-shadow: 0 0 12px #fff6dc, 0 0 26px var(--name-color, #ffc86e); } }
+@keyframes rn-star-in { from { opacity: 0; transform: scale(0) rotate(-120deg); filter: blur(4px); }
+                        to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes rn-twinkle { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(0.72) rotate(18deg); filter: brightness(1.4); } }
+@keyframes rn-halo-in { from { opacity: 0; transform: scale(0.6); } to { opacity: 0.8; transform: none; } }
+@keyframes rn-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+@keyframes rn-out { from { opacity: 1; filter: blur(0); transform: none; }
+                    to { opacity: 0; filter: blur(6px); transform: translateY(-12px); } }
+@keyframes rn-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .rhythm-note .rn-ch, .rhythm-note .rn-star, .rhythm-note::before { animation: none !important; transform: none; filter: none; }
+  .constellation-name .cn-ch, .constellation-name small { animation: none !important; opacity: 1; }
+  .rhythm-note.show .rn-ch, .rhythm-note.show .rn-star { opacity: 1; transition: opacity 0.6s; }
+  .rhythm-note .rn-ch, .rhythm-note .rn-star { transition: opacity 0.6s; }
+  /* the halo too: without its fade-out animation, .leaving's opacity 0.8 would stay on after the text is gone */
+  .rhythm-note::before { transition: opacity 0.6s; }
+  .rhythm-note.show::before { opacity: 0.8; }
+  .rhythm-note.leaving::before { opacity: 0; }
+}
+.settings { position: fixed; top: 100px; right: 16px; width: 240px; padding: 10px 14px; border-radius: 10px;
+  max-height: calc(var(--stage-h, 100vh) - 200px); overflow-y: auto;
+  background: var(--panel); border: 1px solid var(--panel-border); backdrop-filter: blur(6px); }
+.settings h3 { margin: 14px 0 0; padding-top: 10px; border-top: 1px solid var(--panel-border); font-size: 11px;
+  font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.settings label.color { display: flex; justify-content: space-between; align-items: center; }
+.settings select { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--panel-border);
+  border-radius: 5px; font: inherit; font-size: 12px; padding: 2px 4px; }
+.settings select option { background: #0c1838; }
+.settings input[type=color] { width: 44px; height: 22px; padding: 0; border: 1px solid var(--panel-border);
+  border-radius: 5px; background: none; cursor: pointer; }
+.settings h2 { margin: 0 0 6px; font-size: 12px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.06em; }
+.settings label { display: block; margin-top: 8px; font-size: 12px; }
+.settings label span { display: flex; justify-content: space-between; }
+.settings output { color: var(--accent); font-variant-numeric: tabular-nums; }
+.settings input[type=range] { width: 100%; margin: 4px 0 0; accent-color: var(--accent); }
+.settings label.toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.settings label.toggle input { margin: 0; accent-color: var(--accent); }
+.settings .section-actions, .bts-panel .section-actions { display: flex; gap: 6px; margin-top: 10px; }
+.settings .section-actions button, .bts-panel .section-actions button { flex: 1; appearance: none; padding: 4px 0; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--panel-border); background: rgba(255,255,255,0.06); color: var(--text); font: inherit; font-size: 11px; }
+.settings .section-actions button:hover:not(:disabled), .bts-panel .section-actions button:hover:not(:disabled) { background: rgba(255,255,255,0.14); }
+.settings .section-actions button:disabled, .bts-panel .section-actions button:disabled { color: var(--accent); cursor: default; }
+.settings .readout { margin-top: 8px; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+.settings, .hint { transition: opacity .4s; }
+body.bts .settings { opacity: 0; pointer-events: none; }
+
+.bts-panel { position: fixed; left: 16px; top: 84px; width: 290px; padding: 12px 14px; border-radius: 10px;
+  background: var(--panel); border: 1px solid var(--panel-border); backdrop-filter: blur(6px);
+  opacity: 0; transform: translateY(-6px); transition: opacity .5s, transform .5s; pointer-events: none; }
+body.bts .bts-panel { opacity: 1; transform: none; transition-delay: .9s; pointer-events: auto; }
+.bts-panel h2 { margin: 0 0 6px; font-size: 13px; color: var(--accent); letter-spacing: 0.02em; }
+.bts-panel p { margin: 0 0 6px; font-size: 12px; color: var(--text); }
+.bts-panel p:nth-last-child(2), .bts-panel p.bts-tune { color: var(--muted); }
+.bts-panel p.bts-tune { margin: 8px 0 0; padding-top: 8px; border-top: 1px solid var(--panel-border); color: var(--muted); }
+
+.bts-labels { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.bts-label { position: absolute; left: 0; top: 0; padding: 5px 9px; border-radius: 8px; white-space: nowrap;
+  background: var(--panel); border: 1px solid var(--panel-border); font-size: 11px; opacity: 0; }
+.bts-label b { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.bts-label i { font-style: normal; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-ink); font-size: 10px; }
+.bts-label span { display: block; color: var(--muted); }
+.bts-knob { display: flex; align-items: center; gap: 5px; margin-left: 8px; font-size: 11px; font-weight: 500; color: var(--muted); }
+.bts-knob input { width: 90px; margin: 0; accent-color: var(--accent); }
+.bts-knob output { min-width: 34px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.bts-label em { font-style: normal; font-weight: 500; color: var(--accent); margin-left: 4px; }
+
+/* Start screen (startScreen.js), also the loading screen. Layers are full 16:9 frames stacked over each other,
+   drifting slightly with the pointer (scale 1.04 hides the edges). The Play button sits inside the logo layer,
+   at its place in the 3840x2160 art (numbers printed by build_startscreen.py). */
+.startscreen { position: fixed; inset: 0; overflow: hidden; background: #000; transition: opacity .9s ease; }
+.startscreen.gone { opacity: 0; pointer-events: none; }
+.start-layer { position: absolute; inset: 0; opacity: 0; transform: scale(1.04); transition: opacity .7s ease;
+  pointer-events: none; will-change: transform; }
+.start-layer > img { display: block; width: 100%; height: 100%; }
+.startscreen.art .start-layer { opacity: 1; }
+.start-play { position: absolute; left: 40.23%; top: 59.72%; width: 19.58%; padding: 0; border: 0; border-radius: 999px;
+  background: none; cursor: pointer; pointer-events: auto; opacity: 0; visibility: hidden;
+  transition: opacity .8s ease, transform .25s ease, filter .25s ease, visibility 0s .8s; }
+.start-play img { display: block; width: 100%; }
+.startscreen.ready .start-play { opacity: 1; visibility: visible; transition: opacity .8s ease, transform .25s ease, filter .25s ease;
+  animation: start-glow 3.2s ease-in-out infinite; }
+.start-play:hover, .start-play:focus-visible { transform: scale(1.05); filter: drop-shadow(0 0 1.2vmin rgba(255, 201, 74, 0.8)); animation: none; }
+.start-play:active { transform: scale(0.98); }
+.start-play:focus-visible { outline: none; }
+@keyframes start-glow { 50% { filter: drop-shadow(0 0 0.9vmin rgba(255, 201, 74, 0.45)); } }
+/* The loading swirl waits where the Play button will appear (centre of the button), then fades out. */
+.start-wait { position: absolute; left: 50%; top: 63.9%; transform: translate(-50%, -50%); transition: opacity .5s ease; }
+.start-wait .loader { width: 64px; height: 64px; }
+.startscreen.ready .start-wait { opacity: 0; pointer-events: none; }
+.start-error { color: var(--muted); text-align: center; max-width: 60vw; }
+.loader { position: relative; width: 132px; height: 132px; }
+.loader svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.loader img.star { position: absolute; display: block; }   /* the yellow sky star (Assets/ui/loader_star.webp) */
+.loader .swirl { animation: loader-spin 1.4s linear infinite; }
+.loader .swirl.inner { animation-duration: 2.3s; animation-direction: reverse; }
+.loader .star { inset: 24%; width: 52%; height: 52%; animation: loader-pulse 1.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px rgba(255, 201, 74, 0.75)); }
+@keyframes loader-spin { to { transform: rotate(360deg); } }
+@keyframes loader-pulse { 50% { transform: scale(1.1); filter: drop-shadow(0 0 18px rgba(255, 201, 74, 0.95)); } }
+@media (prefers-reduced-motion: reduce) {
+  .loader .swirl { animation-duration: 6s; }
+  .loader .star { animation: none; }
+}
+
+@media (max-width: 520px) {
+  .controls button { min-width: 0; padding: 9px 10px; }
+  .title p { display: none; }
+  .settings { top: 60px; bottom: 140px; right: 16px; left: 16px; width: auto; max-height: none; }
+  .controls { flex-wrap: wrap; justify-content: center; }
+  .bts-panel { top: auto; bottom: 150px; left: 16px; right: 16px; width: auto; }
+  .bts-label span { display: none; }
+}
+/* Player hints (whimsyCaption.js: the roof's "Tap to plant", the greenhouse's circles and grown plant).
+   Written like the constellation names in the sky: spaced capitals with a warm glow that swoosh out of their centre
+   letter by letter, a wave of light running through them, two stars blooming either side and twinkling; the line
+   under it rises in. A wave runs through again now and then. Sized with the stage, drifting gently up and down,
+   over a dark haze with no edges (it breathes in first). Its left / top is the point under its bottom centre. */
+.whimsy-caption { --u: calc(var(--stage-h, 100vh) * 0.01); position: absolute; transform: translate(-50%, -100%); pointer-events: none;
+  white-space: nowrap; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 0.9);
+  padding: calc(var(--u) * 1.6) calc(var(--u) * 4); font-family: var(--ui-font); text-align: center;
+  opacity: 0; transition: opacity 0.5s ease; }
+.whimsy-caption::before { content: ''; position: absolute; inset: -45% -16%; z-index: -1; border-radius: 50%; opacity: 0;
+  background: radial-gradient(closest-side, rgba(3, 5, 20, 0.9), rgba(3, 5, 20, 0.78) 45%, rgba(3, 5, 20, 0.38) 75%, rgba(3, 5, 20, 0)); }
+.whimsy-caption.show { opacity: 1; animation: wc-float 4.5s ease-in-out infinite; }
+.whimsy-caption.show::before { animation: wc-haze-in 0.9s ease-out forwards; }
+.wc-main { font-weight: 500; font-size: max(21px, calc(var(--u) * 3.4)); line-height: 1; letter-spacing: 0.24em; text-transform: uppercase;
+  color: #ffe2a0; text-shadow: 0 0 calc(var(--u) * 1) #ffc86e, 0 calc(var(--u) * 0.2) calc(var(--u) * 0.5) rgba(4, 7, 26, 0.9); }
+.wc-ch, .wc-star, .wc-sub { display: inline-block; opacity: 0; }
+.wc-star { margin: 0 0.45em; font-size: 0.9em; letter-spacing: 0; }
+.whimsy-caption.show .wc-ch {
+  animation: cn-in 0.95s cubic-bezier(0.2, 0.85, 0.25, 1) calc(var(--d) * 0.06s) forwards,
+             wc-wave 6s ease-in-out calc(0.75s + var(--d) * 0.09s) infinite; }
+.whimsy-caption.show .wc-star {
+  animation: rn-star-in 0.9s cubic-bezier(0.2, 1.3, 0.4, 1) 0.45s forwards, rn-twinkle 3.6s ease-in-out 1.35s infinite; }
+.whimsy-caption.show .wc-star:last-child { animation-delay: 0.55s, 1.75s; }
+.whimsy-caption.show .wc-sub { animation: cn-sub 0.95s cubic-bezier(0.2, 0.85, 0.25, 1) 0.35s forwards; }
+.whimsy-caption.hover .wc-ch { color: #fff3d0; }
+.wc-sub { font-weight: 500; font-size: max(13px, calc(var(--u) * 1.95)); line-height: 1; letter-spacing: 0.12em; color: #dde3ff;
+  text-shadow: 0 calc(var(--u) * 0.2) calc(var(--u) * 0.5) rgba(4, 7, 26, 0.95), 0 0 calc(var(--u) * 1) rgba(4, 7, 26, 0.8); }
+@keyframes wc-haze-in { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+/* the sky names' wave (cn-wave), then a long rest before it runs again */
+@keyframes wc-wave { 0%, 18%, 100% { transform: none; }
+                     7% { transform: translateY(calc(var(--u) * -0.6)) scale(1.08); color: #fffaf0;
+                          text-shadow: 0 0 calc(var(--u) * 1.2) #fff6dc, 0 0 calc(var(--u) * 2.6) #ffc86e; } }
+@keyframes wc-float { 50% { transform: translate(-50%, calc(-100% - var(--u) * 0.6)); } }
+/* 'breathe' (the greenhouse hint): like the sky's "in rhythm" note, the letters breathe in one after another out of a
+   soft blur and a wave of light runs through them, the stars bloom last; it drifts away blurred when it goes. */
+.whimsy-caption.breathe { transition: opacity 0.7s ease, filter 0.7s ease; }
+.whimsy-caption.breathe:not(.show) { filter: blur(calc(var(--u) * 0.5)); }
+.whimsy-caption.breathe.show .wc-ch {
+  animation: rn-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i) * 0.035s) forwards,
+             wc-wave 6s ease-in-out calc(0.55s + var(--i) * 0.05s) infinite; }
+.whimsy-caption.breathe.show .wc-star { animation: rn-star-in 0.9s cubic-bezier(0.2, 1.3, 0.4, 1) 0.45s forwards, rn-twinkle 3.6s ease-in-out 1.35s infinite; }
+.whimsy-caption.breathe.show .wc-star:last-child { animation-delay: 0.6s, 1.6s; }
+.whimsy-caption.breathe.show .wc-sub { animation: cn-sub 1.1s cubic-bezier(0.2, 0.85, 0.25, 1) 0.5s forwards; }
+/* soft-out: letters, stars and haze stay as they are while the caption fades away, instead of vanishing at once */
+.whimsy-caption.soft-out:not(.show) .wc-ch, .whimsy-caption.soft-out:not(.show) .wc-star, .whimsy-caption.soft-out:not(.show) .wc-sub,
+.whimsy-caption.soft-out:not(.show)::before { opacity: 1; }
+/* The character's speech bubble in the greenhouse (speechBubble.js): warm paper with a soft glow, its tail pointing
+   down to the right, towards the character just out of the picture, and under it a "Back to the rooftop" button.
+   .speech holds both in a column; its left / top = the bubble's middle and top. The bubble floats in out of a soft
+   blur and drifts gently while it stays (the `translate` property, apart from the transform); the button follows. */
+.speech { --u: calc(var(--stage-h, 100vh) * 0.01); position: absolute; z-index: 3; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 7.5); pointer-events: none; }
+.speech-bubble { position: relative; pointer-events: none;
+  padding: calc(var(--u) * 3) calc(var(--u) * 5); white-space: pre; width: max-content; text-align: center;   /* (lines break only at \n) */
+  font: 500 max(17px, calc(var(--u) * 4))/1.3 var(--ui-font); color: #2b2545; background: #fbf2de;
+  border-radius: calc(var(--u) * 6) calc(var(--u) * 7) calc(var(--u) * 5.5) calc(var(--u) * 7.5) / calc(var(--u) * 5.5) calc(var(--u) * 5) calc(var(--u) * 6.5) calc(var(--u) * 6);
+  box-shadow: 0 0 0 calc(var(--u) * 0.35) rgba(255, 236, 196, 0.85), 0 0 calc(var(--u) * 4) rgba(255, 206, 120, 0.35),
+    0 calc(var(--u) * 1.2) calc(var(--u) * 3) rgba(4, 7, 26, 0.55);
+  transform-origin: 90% 130%; transform: scale(0.88);
+  opacity: 0; filter: blur(calc(var(--u) * 0.5));
+  transition: opacity 0.8s ease, filter 0.8s ease, transform 1s cubic-bezier(0.2, 1.15, 0.35, 1); }
+.speech-bubble::after { content: ''; position: absolute; top: calc(100% - 1px); right: calc(var(--u) * 3);
+  width: calc(var(--u) * 4.5); height: calc(var(--u) * 5); background: inherit;
+  clip-path: polygon(0 0, 78% 0, 100% 100%, 42% 18%); }
+.speech.show .speech-bubble { opacity: 1; filter: none; transform: none; animation: sb-float 5s ease-in-out 1s infinite; }
+@keyframes sb-float { 50% { translate: 0 calc(var(--u) * -0.7); } }
+/* The button: the pill of the other buttons (.return-btn), with the roof icon in front; it rises in after the bubble. */
+.speech .return-btn.speech-btn { position: relative; left: auto; bottom: auto; display: flex; align-items: center; gap: 0.55em;
+  padding: 0.55em 1.4em 0.55em 1.1em; transform: translateY(calc(var(--u) * 1.5));
+  transition: opacity 0.8s ease 0.6s, transform 0.9s cubic-bezier(0.2, 1.15, 0.35, 1) 0.6s, background 0.2s; }
+.speech .return-btn.speech-btn.show { transform: none; }
+.speech .return-btn.speech-btn svg { width: 1.35em; height: 1.35em; flex: none; fill: none; stroke: currentColor; stroke-width: 2.8;
+  stroke-linecap: round; stroke-linejoin: round; }
+.speech .return-btn.speech-btn svg .fill { fill: currentColor; stroke: none; }
+
+/* The roof dimming around a plant taking root (roofGarden.js): over the game, under the UI; --x / --y = the plant */
+.plant-hush { position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(ellipse 60% 75% at var(--x, 50%) var(--y, 50%), rgba(4, 7, 28, 0) 22%, rgba(4, 7, 28, 0.45) 60%, rgba(4, 7, 28, 0.9) 100%); }
+
+/* Sky search rim hints (dragSearch.js): soft glows on the eyepiece's edge pointing to a waiting constellation.
+   Fixed like the vignette, placed right after it (over its dark rim, under the UI); added onto the sky like light. */
+.search-hint { position: fixed; left: 0; top: 0; border-radius: 50%; pointer-events: none; will-change: transform, opacity; mix-blend-mode: plus-lighter; }
+
+/* The grab hint (dragSearch.js): a hand gripping the sky and pulling it to and fro, between two soft arrows, in the
+   middle of the eyepiece. */
+.grab-hand { --u: calc(var(--stage-h, 100vh) * 0.01); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; pointer-events: none;
+  display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 13); color: #ffe2a0; opacity: 0; transition: opacity 0.9s ease;
+  filter: drop-shadow(0 0 calc(var(--u) * 0.8) #ffc86e); }
+.grab-hand.show { opacity: 1; }
+.grab-way { font-size: calc(var(--u) * 5); line-height: 1; opacity: 0.55; animation: grab-way 4s ease-in-out infinite; }
+.grab-way:last-child { animation-delay: -2s; }
+.grab-icon { position: relative; width: calc(var(--u) * 9); height: calc(var(--u) * 9); animation: grab-sweep 4s ease-in-out infinite; }
+.grab-icon svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.grab-icon svg:first-child { animation: grab-open 4s ease-in-out infinite; }
+.grab-icon svg:last-child { animation: grab-shut 4s ease-in-out infinite; }
+@keyframes grab-sweep { 0%, 12% { transform: translateX(calc(var(--u) * -5)); } 44%, 62% { transform: translateX(calc(var(--u) * 5)); } 94%, 100% { transform: translateX(calc(var(--u) * -5)); } }
+@keyframes grab-open { 0%, 4%, 56%, 100% { opacity: 1; } 12%, 44% { opacity: 0; } }
+@keyframes grab-shut { 0%, 4%, 56%, 100% { opacity: 0; } 12%, 44% { opacity: 1; } }
+@keyframes grab-way { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.75; } }
